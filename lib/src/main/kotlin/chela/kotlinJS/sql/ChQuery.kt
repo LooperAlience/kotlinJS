@@ -7,6 +7,7 @@ class ChQuery(key:String, body:String){
         when{
             query.startsWith("select") -> Select.parse(query)
             query.startsWith("insert") -> Insert.parse(query)
+            query.startsWith("delete") -> Delete.parse(query)
             else-> Select.parse(query)
         } ?: throw Throwable("invalid query:$query")
     }

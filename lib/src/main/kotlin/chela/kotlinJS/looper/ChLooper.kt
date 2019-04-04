@@ -41,7 +41,10 @@ class ChLooper{
         val gap = c - previus
         if(gap > 0.0) fps = 1000.0 / gap
         previus = c
-        if(items.isEmpty()) return
+        if(items.isEmpty()){
+            window.requestAnimationFrame(f)
+            return
+        }
         remove.clear()
         add.clear()
         var i = 0

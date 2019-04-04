@@ -12,7 +12,7 @@ class Api(v:dynamic, base:String){
         if(r != null) "$r".split("|").map{it.trim()} else null
     }
     val responseTask = run{
-        val r = if(v.responsetask != undefined) v.requesttask else if (v.responseTask != undefined) v.requestTask else null
+        val r = if(v.responsetask != undefined) v.responsetask else if (v.responseTask != undefined) v.responseTask else null
         if(r != null) "$r".split("|").map{it.trim()} else null
     }
     val request = if(v.request != undefined){

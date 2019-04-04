@@ -11,10 +11,11 @@ import chela.kotlinJS.net.ChNet.apis
 import chela.kotlinJS.regex.reParam
 import chela.kotlinJS.resource.Api
 import chela.kotlinJS.validation.ChRuleSet
+import kotlin.js.Promise
 
 typealias httpCallBack = (response: ChResponse)->Unit
 typealias requestTaskF = (http: ChHttp, arg:MutableList<Pair<String, Any>>, taskArg:List<String>)->Boolean
-typealias responseTaskF = (response: ChResponse, taskArg:List<String>)-> Boolean
+typealias responseTaskF = (response: ChResponse, taskArg:List<String>)-> Promise<Boolean>
 
 /**
  * This object handles send HTTP request and read response.
@@ -52,28 +53,19 @@ object ChNet {
     val timestamp = mutableMapOf<String, Long>()
     private val responseTask = mutableMapOf<String, responseTaskF>(
         "json" to {res, _->
-            (res.extra[EXTRA_JSON] ?: res.body)?.let{v->
-                var r:dynamic = null
-                _try{r = JSON.parse("$v")}
-                @Suppress("UnsafeCastFromDynamic")
-                if(r != null){
-                    res.extra[EXTRA_JSON] = r
-                    res.result = r
+            res.json?.then{
+                if(it != null){
+                    res.extra[EXTRA_JSON] = it
+                    res.result = it
                     true
                 }else false
-            } ?: false
+            } ?: Promise.resolve(false)
         },
-        "timestamp" to { res, arg->
-            res.extra[EXTRA_JSON]?.let{
-                var r:dynamic = it
-                if(r[arg[0]] != undefined){
-                    val v = r[arg[0]] as Long
-                    val k = "${res.key}:${res.arg._toString()}"
-                    timestamp[k]?.let{ t -> if(v > t) timestamp[k] = v else false} ?:
-                    run{ timestamp[k] = v}
-                }
-            }
-        true
+        "body" to {res, _->
+            res.body?.then{
+                res.result = it
+                true
+            } ?: Promise.resolve(false)
         }
     )
     fun apiRequestTask(key: String, block: requestTaskF) {
@@ -137,14 +129,18 @@ object ChNet {
         net.send{res->
             res.key = key
             res.arg = reqItem
-            api.responseTask?.all {
-                val (k, arg) = reParam.parse(it)
-                responseTask[k]?.let {it(res, arg)} ?: run{
-                    res.err = "invalid response task:$it for $key"
-                    false
+            api.responseTask?.let{list->
+                var i = 0
+                val j = list.size
+                fun loop(){
+                    val (k, arg) = reParam.parse(list[i++])
+                    responseTask[k]?.invoke(res, arg)?.then{if(it && i < j) loop() else block(res)} ?: run{
+                        res.err = "invalid response task:$k for $key"
+                        block(res)
+                    }
                 }
+                loop()
             }
-            block(res)
         }
         return Ch.ApiResult.ok
     }

@@ -1,10 +1,10 @@
 package chela.kotlinJS.dom
 
-import org.w3c.dom.Element
-import org.w3c.dom.HTMLElement
+import org.w3c.dom.*
 import kotlin.browser.document
 
 typealias elInit = El.()->Unit
+
 
 object ChDom{
     private val doc = document
@@ -14,14 +14,11 @@ object ChDom{
     private val select = doc.createElement("select")
     fun el(tagName:String, block: elInit? = null):HTMLElement{
         val el = doc.createElement(tagName) as HTMLElement
-        block?.let{
-            El.el = el
-            El.it()}
+        block?.let{El(el).it()}
         return el
     }
     fun el(element:HTMLElement, block: elInit):HTMLElement{
-        El.el = element
-        El.block()
+        El(element).block()
         return element
     }
     fun tag2html(txt:String):HTMLElement{

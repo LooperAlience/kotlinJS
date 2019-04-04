@@ -1,80 +1,93 @@
 package chela.kotlinJS.dom
 
+import chela.kotlinJS.core.ChJS.isIn
+import chela.kotlinJS.core.delete
+import chela.kotlinJS.core.uuid
+import chela.kotlinJS.model.ChModel
 import chela.kotlinJS.regex.reStyle
+import chela.kotlinJS.view.scanner.template.ChTemplate
+import chela.kotlinJS.view.scanner.template.TemplateData
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLFormElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLSelectElement
 import org.w3c.dom.events.Event
 import kotlin.browser.document
+import kotlin.browser.window
 
 typealias domEvent = (Event, HTMLElement)->Unit
-object El{
-    private val event = run{
-        val doc = document.asDynamic()
-        doc.ch = js("{e:{}}")
-        doc.ch.e
-    }
-    private var _el:HTMLElement = document.body!!
-    internal var el:HTMLElement
-        get() = _el
-        set(v){
-            _el = v
-            elStyle = v.style.asDynamic()
+class El(val el:HTMLElement){
+    companion object {
+        private val event = run{
+            val win = window.asDynamic()
+            win.__ch__ = js("{e:{}}")
+            win.__ch__.e
         }
-    private var elStyle:dynamic? = null
-    private val bodyStyle = document.body?.style
-    private val prefix = "webkit,Moz,chrome,ms".split(',')
-    private val keys = mutableMapOf<String, String>()
-    private val prop = mutableMapOf<String, (String, String)->Unit>(
-        "className" to {_, v-> _el.className = v},
-        "html" to {_, v-> _el.innerHTML = v},
-        "+html" to {_, v-> _el.innerHTML = v + _el.innerHTML},
-        "html+" to {_, v-> _el.innerHTML += v},
-        "submit" to {_, _->(_el as? HTMLFormElement)?.let{it.submit()}},
-        "focus" to {_, _-> _el.focus()},
-        "blur" to {_, _-> _el.blur()},
-        "checked" to {_, v->(_el as? HTMLInputElement)?.let{it.checked = v == "true"}},
-        "selected" to {_, v->if(v == "false") (_el as? HTMLSelectElement)?.let{it.selectedIndex = -1}},
-        "unselect" to {_, v->
-            if(v == "true"){
-                set("user-select", "none")
-                set("touch-callout", "none")
-                _el.setAttribute("unselectable", "on")
-                _el.setAttribute("onselectstart", "return false")
-            }else{
-                set("user-select", "null")
-                set("touch-callout", "null")
-                _el.removeAttribute("unselectable")
-                _el.removeAttribute("onselectstart")
-            }
-        },
-        "value" to {_, v->v?.let{
-                _el.setAttribute("value", v)
-                (_el as? HTMLSelectElement)?.let{it.value = v } ?:
-                (_el as? HTMLInputElement)?.let{it.value = v }
-            } ?: run{
-                _el.removeAttribute("value")
-                (_el as? HTMLSelectElement)?.let{it.value = ""} ?:
-                (_el as? HTMLInputElement)?.let{it.value = ""}
-            }
-        },
-        "A" to {k, v-> _el.setAttribute(k, v)}
-    )
-    operator fun set(k:String, v:Any){
-        println("elSet:$k-$v")
-        if(k[0] == 'E'){
-            println("E-" + )
-            _el.setAttribute("on" + k.substring(1), "document.ch.e.a(event, this)")
-            @Suppress("UNCHECKED_CAST")
-            (v as? domEvent)?.let{
-                event.a = it
-            }
-        }else {
-            val s = "$v"
-            prop["${k[0]}"]?.let { it(k.substring(1), s) } ?: prop[k]?.let { it(k, s) } ?: run {
-                val kk = keys[k] ?: key(k)
-                if (kk != "") elStyle[kk] = if (s == "null") null else s
+        private val body = document.body
+        private val bodyStyle = document.body?.style
+        private val prefix = "webkit,Moz,chrome,ms".split(',')
+        private val evKey = mutableMapOf<String, String?>()
+        private val keys = mutableMapOf<String, String>()
+        private val prop = mutableMapOf<String, (El, HTMLElement, String, String)->Unit>(
+                "className" to {self, el, _, v-> el.className = v},
+                "html" to {self, el, _, v-> el.innerHTML = v},
+                "+html" to {self, el, _, v-> el.innerHTML = v + el.innerHTML},
+                "html+" to {self, el, _, v-> el.innerHTML += v},
+                "submit" to {self, el, _, _->(el as? HTMLFormElement)?.let{it.submit()}},
+                "focus" to {self, el, _, _-> el.focus()},
+                "blur" to {self, el, _, _-> el.blur()},
+                "checked" to {self, el, _, v->(el as? HTMLInputElement)?.let{it.checked = v == "true"}},
+                "selected" to {self, el, _, v->if(v == "false") (el as? HTMLSelectElement)?.let{it.selectedIndex = -1}},
+                "unselect" to {self, el, _, v->
+                    if(v == "true"){
+                        self["user-select"] = "none"
+                        self["touch-callout"] = "none"
+                        el.setAttribute("unselectable", "on")
+                        el.setAttribute("onselectstart", "return false")
+                    }else{
+                        self["user-select"] = "null"
+                        self["touch-callout"] = "null"
+                        el.removeAttribute("unselectable")
+                        el.removeAttribute("onselectstart")
+                    }
+                },
+                "value" to {self, el, _, v->v?.let{
+                    el.setAttribute("value", v)
+                    (el as? HTMLSelectElement)?.let{it.value = v } ?:
+                    (el as? HTMLInputElement)?.let{it.value = v }
+                } ?: run{
+                    el.removeAttribute("value")
+                    (el as? HTMLSelectElement)?.let{it.value = ""} ?:
+                    (el as? HTMLInputElement)?.let{it.value = ""}
+                }
+                },
+                "A" to {self, el, k, v-> el.setAttribute(k, v)}
+        )
+    }
+    private var elStyle = el.style.asDynamic()
+
+    operator fun set(k:String, _v:Any){
+        if(k == "template"){
+            (_v as? TemplateData)?.let {ChTemplate.render(el, it.data, it.templates)}
+            return
+        }
+        val v = if(_v is String && _v[0] == '@') ChModel[_v.substring(2, _v.length - 1)] else _v
+        val s = "$v"
+        prop["${k[0]}"]?.let {it(this, el, k.substring(1), s)} ?: prop[k]?.let{it(this, el, k, s)} ?: run{
+            val kk = keys[k] ?: key(k)
+            if (kk != "") elStyle[kk] = if (s == "null") null else s
+            else eventKey(k)?.let{k->
+                @Suppress("UNCHECKED_CAST")
+                if(v == "null"){
+                    el.getAttribute(k)?.let{
+                        if(it.isNotBlank()) delete(event[it.substring(it.indexOf('[') + 1, it.indexOf(']'))])
+                    }
+                    el.removeAttribute(k)
+                }else (v as? domEvent)?.let {
+                    val id = uuid()
+                    event[id] = it
+                    el.setAttribute(k, "__ch__.e['$id'](event, this)")
+                }
             }
         }
     }
@@ -98,10 +111,14 @@ object El{
         keys[k] = r
         return r
     }
+    private fun eventKey(k:String) = run {
+        if(!evKey.containsKey(k)) evKey[k] = if(isIn("on$k", body)) "on$k" else null
+        evKey[k]
+    }
     var className:String
-        get()= _el.className
+        get()= el.className
         set(v){
-            _el.className = v}
+            el.className = v}
 
     fun addClass(vararg v:String){
         val cls = className.trim().split(" ")
@@ -116,26 +133,26 @@ object El{
         className = cls.joinToString(" ")
     }
     var html:String
-        get() = _el.innerHTML
+        get() = el.innerHTML
         set(v){
-            _el.innerHTML = v}
+            el.innerHTML = v}
     fun beforeHtml(v:String){
-        _el.innerHTML = "$v${_el.innerHTML}"}
+        el.innerHTML = "$v${el.innerHTML}"}
     fun afterHtml(v:String){
-        _el.innerHTML += v}
-    fun submit() = (_el as? HTMLFormElement)?.let{it.submit()}
-    fun focus() = _el.focus()
-    fun blur() = _el.blur()
+        el.innerHTML += v}
+    fun submit() = (el as? HTMLFormElement)?.let{it.submit()}
+    fun focus() = el.focus()
+    fun blur() = el.blur()
     var checked:Boolean
-        get() = (_el as? HTMLInputElement)?.let{it.checked} ?: false
-        set(v){(_el as? HTMLInputElement)?.let{it.checked = v}}
+        get() = (el as? HTMLInputElement)?.let{it.checked} ?: false
+        set(v){(el as? HTMLInputElement)?.let{it.checked = v}}
     var selected:Boolean
-        get() = (_el as? HTMLSelectElement)?.let{it.selectedIndex != -1} ?: false
+        get() = (el as? HTMLSelectElement)?.let{it.selectedIndex != -1} ?: false
         set(v){
-            if(!v) (_el as? HTMLSelectElement)?.let{it.selectedIndex = -1}
+            if(!v) (el as? HTMLSelectElement)?.let{it.selectedIndex = -1}
         }
     var style:String
-        get() = _el.style.cssText
+        get() = el.style.cssText
         set(v) = v.split(";").forEach {
             val v = it.split(":").map{it.trim()}
             set(v[0], v[1])
@@ -146,27 +163,27 @@ object El{
             if(v){
                 set("user-select", "none")
                 set("touch-callout", "none")
-                _el.setAttribute("unselectable", "on")
-                _el.setAttribute("onselectstart", "return false")
+                el.setAttribute("unselectable", "on")
+                el.setAttribute("onselectstart", "return false")
             }else{
                 set("user-select", "null")
                 set("touch-callout", "null")
-                _el.removeAttribute("unselectable")
-                _el.removeAttribute("onselectstart")
+                el.removeAttribute("unselectable")
+                el.removeAttribute("onselectstart")
             }
         }
     var value:String?
-        get() = (_el as? HTMLSelectElement)?.let{it.value} ?:
-            (_el as? HTMLInputElement)?.let{it.value} ?: ""
+        get() = (el as? HTMLSelectElement)?.let{it.value} ?:
+            (el as? HTMLInputElement)?.let{it.value} ?: ""
         set(v){
             v?.let{
-                _el.setAttribute("value", v)
-                (_el as? HTMLSelectElement)?.let{it.value = v} ?:
-                (_el as? HTMLInputElement)?.let{it.value = v}
+                el.setAttribute("value", v)
+                (el as? HTMLSelectElement)?.let{it.value = v} ?:
+                (el as? HTMLInputElement)?.let{it.value = v}
             } ?: run{
-                _el.removeAttribute("value")
-                (_el as? HTMLSelectElement)?.let{it.value = ""} ?:
-                (_el as? HTMLInputElement)?.let{it.value = ""}
+                el.removeAttribute("value")
+                (el as? HTMLSelectElement)?.let{it.value = ""} ?:
+                (el as? HTMLInputElement)?.let{it.value = ""}
             }
         }
 }

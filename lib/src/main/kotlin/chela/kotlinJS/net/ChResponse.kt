@@ -8,8 +8,8 @@ import kotlin.js.Promise
 class ChResponse(private val response: Response?, var err:String? = null){
     var key:String = ""
     var arg:List<Pair<String, Any>>? = null
-    val extra = mutableMapOf<String, Any>()
-    var result:Any = ""
+    val extra = mutableMapOf<String, dynamic>()
+    var result:dynamic = ""
     val state:Int by lazy{(response?.status ?: 0).toInt()}
     private var text:String? = null
     private var bl:Blob? = null

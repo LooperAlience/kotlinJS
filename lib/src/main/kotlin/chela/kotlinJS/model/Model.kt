@@ -30,9 +30,7 @@ abstract class Model(val _isRegister:Boolean = false){
     init{
         if(_isRegister){
             val cls = this::class
-            println("aaa")
             cls.simpleName?.let {
-                println("aaa:$it")
                 if (ChModel.repo.containsKey(it)) throw Exception("exist key:$it")
                 ChModel.repo[it] = this
             }

@@ -1,7 +1,9 @@
 package chela.kotlinJS.view.scanner
 
+import chela.kotlinJS.core.toList
+import chela.kotlinJS.view.scanner.template.ChTemplate
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.get
+import kotlin.collections.set
 
 /**
  * This object scans the HTMLElement's items. Here, items refers to ChScanItem.
@@ -11,21 +13,14 @@ import org.w3c.dom.get
 object ChScanner{
     private val scanned = mutableMapOf<Any, ChScanned>()
     operator fun get(k:Any): ChScanned? = scanned[k]
-    fun scan(id:Any, view: HTMLElement): ChScanned {
+    fun scan(view:HTMLElement, id:Any? = null): ChScanned {
         val prev = scanned[id]
         if(prev != null && prev.view == view) return prev
+        template(view)
         val result = ChScanned(view)
-        scanned[id] = result
-        val st = view.querySelectorAll("[data-ch]")
-        val j = if(view.getAttribute("data-ch").isNullOrBlank()) {
-            st.length
-        }else{
-            st.asDynamic()[st.length] = view
-            st.length + 1
-        }
-        var i = 0
-        while(i < j){
-            val el = st[i] as HTMLElement
+        val st = view.querySelectorAll("[data-ch]").toList()
+        if(!view.getAttribute("data-ch").isNullOrBlank()) st += view
+        st.forEach {el->
             val pos = mutableListOf<Int>()
             var t = el
             var limit = 30
@@ -36,7 +31,7 @@ object ChScanner{
                     var kt = p.firstElementChild
                     while(k < 100 && kt != null && kt !== t){
                         k++
-                        kt = kt?.nextElementSibling
+                        kt = kt.nextElementSibling
                     }
                     pos += k
                     t = p
@@ -45,8 +40,15 @@ object ChScanner{
             val target = ChScanItem(el, pos)
             target.fromJson("{${el.getAttribute("data-ch")}}")
             result += target
-            i++
+            el.removeAttribute("data-ch")
         }
+        id?.let{scanned[id] = result}
         return result
+    }
+    fun template(view:HTMLElement){
+        val st = view.querySelectorAll("[data-cht]").toList()
+        if(!view.getAttribute("data-cht").isNullOrBlank()) st += view
+        st.forEach{it.parentElement?.removeChild(it)}
+        st.forEach{ChTemplate += it}
     }
 }
