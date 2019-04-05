@@ -4,8 +4,6 @@ import chela.kotlinJS.core.ChJS.obj
 import kotlin.js.Promise
 
 internal class Select: Query(){
-
-
     companion object {
         private val rSelect = """^\s*select([\s\S]+?)\s+from([\s\S]+?)\s*$""".toRegex()
         private val rLimit = """\slimit\s+([0-9]+)$""".toRegex()
@@ -162,8 +160,6 @@ internal class Select: Query(){
                 i++
             }
         }
-        println("select query")
-        println(JSON.stringify(r))
         return ChJS.then(DataBase.connection.select(r)) {
             val r = it as Array<dynamic>
             fields?.let {f->

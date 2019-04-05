@@ -1,28 +1,23 @@
 package chela.kotlinJS
 
 import chela.kotlin.resource.ChRes
-import chela.kotlinJS.dom.ChEvent
 import chela.kotlinJS.looper.ChLooper
 import chela.kotlinJS.model.ChModel
-import chela.kotlinJS.validation.ChRuleSet
-import chela.kotlinJS.sql.ChSql
 import chela.kotlinJS.net.ChNet
 import chela.kotlinJS.net.ChResponse
+import chela.kotlinJS.sql.ChSql
 import chela.kotlinJS.sql.DataBase
+import chela.kotlinJS.validation.ChRuleSet
 import chela.kotlinJS.view.router.ChRouter
 import chela.kotlinJS.view.router.holder.ChGroupBase
 import chela.kotlinJS.view.router.holder.ChHolderBase
 import chela.kotlinJS.view.scanner.ChScanner
+import chela.kotlinJS.view.scanner.template.ChTemplate
 import chela.kotlinJS.view.scanner.template.TemplateData
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.events.Event
-import kotlin.browser.document
-import kotlin.js.Date
 import kotlin.js.Promise
 
-typealias getDB = (DataBase)->Promise<dynamic>
-typealias setDB = (DataBase, ChResponse)->Promise<dynamic>
-typealias getData = (dynamic, Array<dynamic>?)->Unit
 object Ch{
     var debugLevel = 0
     val NONE = object{}
@@ -34,20 +29,35 @@ object Ch{
     val model = ChModel
     val scanner = ChScanner
 
-    private val data = mutableMapOf<Any, dynamic>()
-
-    fun data(key:Any, api:String, db:String, getDB:getDB, setDB:setDB, arg:Array<dynamic>? = null, block:getData){
-        if(data.containsKey(key)) block(data[key], arg)
-        else ChSql.db(db).then{d->
-            getDB(d).then{v:dynamic->
-                if(v != null && v.timestamp + v.limit < Date.now()){
-                    ChRes.res(v)
-                    data[key] = v
-                    block(v, arg)
-                }else{
-                    Ch.net.api(api){res ->
-                        setDB(d, res).then{it:dynamic->data(key, api, db, getDB, setDB, arg, block)}
-                    }
+    class ChEvent(val event: Event, val el:HTMLElement){
+        private val eld = el.asDynamic()
+        private val _data = eld.__chel__.data
+        val data:dynamic get() = _data.data
+        @Suppress("UnsafeCastFromDynamic")
+        val index:Int get() = _data.index
+        @Suppress("UnsafeCastFromDynamic")
+        val length:Int get() = _data.length
+        fun render() = (_data.tmpl as? ChTemplate)?.let{
+            it.rerender(_data.view, index, length, data, false)
+        }
+    }
+    abstract class Data(val key:Any, val db:String, val api:String){
+        companion object {
+            private val data = mutableMapOf<Any, dynamic>()
+        }
+        protected abstract fun getDB(db:DataBase):Promise<dynamic>
+        protected abstract fun isValid(v:dynamic):Boolean
+        protected abstract fun setDB(db:DataBase, res:ChResponse):Promise<dynamic>
+        protected abstract fun getData(v:dynamic)
+        fun data(){
+            if(data.containsKey(key)) getData(data[key])
+            else ChSql.db(db).then{db->
+                getDB(db).then{v:dynamic->
+                    if(isValid(v)){
+                        ChRes.res(v)
+                        data[key] = v
+                        data()
+                    }else Ch.net.api(api){res ->setDB(db, res).then{it:dynamic->data()}}
                 }
             }
         }
@@ -62,6 +72,4 @@ object Ch{
     fun looper() = ChLooper()
     fun <T> router(base: ChHolderBase<T>) = ChRouter(base)
     fun router(el:HTMLElement) = ChRouter(ChGroupBase(el))
-    fun router(el:String) = ChRouter(ChGroupBase(document.querySelector(el) as HTMLElement))
-
 }

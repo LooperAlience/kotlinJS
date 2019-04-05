@@ -1,6 +1,7 @@
 package chela.kotlinJS.view.scanner
 
 import chela.kotlinJS.core.ChJS
+import chela.kotlinJS.core.ChJS.objForEach
 import chela.kotlinJS.core._shift
 import chela.kotlinJS.dom.getChildAt
 import chela.kotlinJS.model.ChModel
@@ -113,7 +114,10 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
             record?.forEach {(k, keys)->
                 var v = data
                 keys.forEach{v = v[it]}
-                col[k] = v
+                when(k){
+                    "style"->{objForEach(v){k, v->col[k] = v}}
+                    else->col[k] = v
+                }
             }
         }
         return col

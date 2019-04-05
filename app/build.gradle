@@ -2,7 +2,6 @@ plugins {
     id 'kotlin2js' version '1.3.21'
 }
 apply plugin: 'kotlin-dce-js'
-version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()

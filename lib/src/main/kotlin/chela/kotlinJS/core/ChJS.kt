@@ -28,15 +28,19 @@ object ChJS {
     val enc = js("encodeURIComponent")
     @Suppress("UnsafeCastFromDynamic")
     fun encodeURIComponent(v:String):String = enc(v)
+    val dec = js("decodeURIComponent")
+    @Suppress("UnsafeCastFromDynamic")
+    fun decodeURIComponent(v:String):String = dec(v)
     val inF = js("function(k, t){return k in t;}")
     fun isIn(key:String, target:dynamic) = inF(key, target) as Boolean
-
     fun addJs(path:String) = Promise<dynamic>{res,_->
         val script = document.createElement("script")
         script.setAttribute("src", path)
         script.addEventListener("load", res)
         document.head?.appendChild(script)
     }
+    val isFun = js("function(v){return typeof v == 'function';}")
+    fun isFunction(v:dynamic) = isFun(v)
 }
 
 external fun delete(p: dynamic): Boolean = definedExternally

@@ -11,11 +11,9 @@ class DataBase internal     constructor(private val db:String, ver:Int, private 
         private var rColumn = """ *([a-zA-Z_]+) +([a-z0-9()]+)(?: +(?:(not null)|(primary key)|(autoincrement)|(unique)|(default += +[a-zA-Z0-9])))*""".toRegex()
         @Suppress("UnsafeCastFromDynamic")
         private fun create(q:String):dynamic = rCreate.find(q)?.let{
-            println("create")
             obj{
                 name = it.groupValues[1]
                 columns = js("[]")
-                println("name $name")
                 it.groupValues[2].split(",").forEachIndexed { index, s ->
                     rColumn.find(s)?.let{
                         val v = it.groupValues
@@ -59,7 +57,6 @@ class DataBase internal     constructor(private val db:String, ver:Int, private 
         if(isCreate) res(this)
         else then(connection.isDbExist(db)){
             if(it == true) then(connection.openDb(db)){
-                println("open db")
                 isCreate = true
                 res(this)
             } else then(connection.createDb(obj{
@@ -72,7 +69,6 @@ class DataBase internal     constructor(private val db:String, ver:Int, private 
                     }
                 }
             })){
-                println("define db - $it")
                 isCreate = true
                 res(this)
             }

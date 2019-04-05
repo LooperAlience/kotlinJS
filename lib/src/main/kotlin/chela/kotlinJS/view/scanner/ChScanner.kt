@@ -14,8 +14,10 @@ object ChScanner{
     private val scanned = mutableMapOf<Any, ChScanned>()
     operator fun get(k:Any): ChScanned? = scanned[k]
     fun scan(view:HTMLElement, id:Any? = null): ChScanned {
-        val prev = scanned[id]
-        if(prev != null && prev.view == view) return prev
+        if(id != null) {
+            val prev = scanned[id]
+            if (prev != null && prev.view == view) return prev
+        }
         template(view)
         val result = ChScanned(view)
         val st = view.querySelectorAll("[data-ch]").toList()
