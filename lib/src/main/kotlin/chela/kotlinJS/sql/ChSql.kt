@@ -8,6 +8,7 @@ object ChSql{
     fun init(path:String = "sql.js") = addJs(path)
     fun db(k:String) = Dbs[k]?.connect() ?: throw Throwable("invalid db $k")
     fun addDb(k:String, vararg create:String){
+        println("addDB $k")
         if(Dbs[k] != null) throw Throwable("exist db:$k")
         Dbs[k] = DataBase(k, 1, create, "")
     }

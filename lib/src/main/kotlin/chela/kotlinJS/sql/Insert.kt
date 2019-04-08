@@ -43,10 +43,7 @@ internal class Insert(private val table:String):Query(){
             values = js("[]")
             values[0] = vo
         }
-        println("insert query")
-        println(JSON.stringify(o))
         then(DataBase.connection.insert(o)){
-            println("inserted!!")
             null
         }!!
     }

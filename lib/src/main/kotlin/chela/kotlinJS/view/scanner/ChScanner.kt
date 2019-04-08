@@ -40,7 +40,8 @@ object ChScanner{
                 }
             }
             val target = ChScanItem(el, pos)
-            target.fromJson("{${el.getAttribute("data-ch")}}")
+            val v = el.getAttribute("data-ch") ?: ""
+            target.fromJson( if(v[0] == '@' || v[0] == '$') "{style:$v}" else "{$v}")
             result += target
             el.removeAttribute("data-ch")
         }

@@ -1,6 +1,7 @@
 package chela.kotlinJS
 
 import chela.kotlin.resource.ChRes
+import chela.kotlinJS.dom.domEvent
 import chela.kotlinJS.looper.ChLooper
 import chela.kotlinJS.model.ChModel
 import chela.kotlinJS.net.ChNet
@@ -29,6 +30,8 @@ object Ch{
     val model = ChModel
     val scanner = ChScanner
 
+    class Update(val v:Any)
+    class Once(val v:Any)
     class ChEvent(val event: Event, val el:HTMLElement){
         private val eld = el.asDynamic()
         private val _data = eld.__chel__.data
@@ -41,7 +44,7 @@ object Ch{
             it.rerender(_data.view, index, length, data, false)
         }
     }
-    abstract class Data(val key:Any, val db:String, val api:String){
+    abstract class Data(val key:Any, val db:String, val api:String, val arg:Array<Pair<String, Any>> = arrayOf()){
         companion object {
             private val data = mutableMapOf<Any, dynamic>()
         }
@@ -57,7 +60,7 @@ object Ch{
                         ChRes.res(v)
                         data[key] = v
                         data()
-                    }else Ch.net.api(api){res ->setDB(db, res).then{it:dynamic->data()}}
+                    }else Ch.net.api(api, *arg){res ->setDB(db, res).then{it:dynamic->data()}}
                 }
             }
         }
@@ -68,8 +71,10 @@ object Ch{
         class fail(msg:String):ApiResult(msg)
     }
     fun templateData(data:Array<dynamic>?, vararg template: String) = TemplateData(data, template)
+    fun domEvent(block:domEvent):domEvent = block
     fun event(e: Event, el:HTMLElement) = ChEvent(e, el)
     fun looper() = ChLooper()
     fun <T> router(base: ChHolderBase<T>) = ChRouter(base)
     fun router(el:HTMLElement) = ChRouter(ChGroupBase(el))
+
 }

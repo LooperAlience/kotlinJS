@@ -34,7 +34,7 @@ class El(val el:HTMLElement){
                 "+html" to {self, el, _, v-> el.innerHTML = v + el.innerHTML},
                 "html+" to {self, el, _, v-> el.innerHTML += v},
                 "submit" to {self, el, _, _->(el as? HTMLFormElement)?.let{it.submit()}},
-                "focus" to {self, el, _, _-> el.focus()},
+                "focus" to {self, el, _, v-> if(v == "true") el.focus()},
                 "blur" to {self, el, _, _-> el.blur()},
                 "checked" to {self, el, _, v->(el as? HTMLInputElement)?.let{it.checked = v == "true"}},
                 "selected" to {self, el, _, v->if(v == "false") (el as? HTMLSelectElement)?.let{it.selectedIndex = -1}},
@@ -67,6 +67,7 @@ class El(val el:HTMLElement){
     private var elStyle = el.style.asDynamic()
 
     operator fun set(k:String, _v:Any){
+        if(_v == undefined) return
         if(k == "template"){
             (_v as? TemplateData)?.let {ChTemplate.render(el, it.data, it.templates)}
             return

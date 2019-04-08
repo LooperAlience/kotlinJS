@@ -1,5 +1,6 @@
 package chela.kotlinJS.view.scanner
 
+import chela.kotlinJS.Ch
 import chela.kotlinJS.core.ChJS
 import chela.kotlinJS.core.ChJS.objForEach
 import chela.kotlinJS.core._shift
@@ -20,11 +21,13 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
     private var template:TemplateData? = null
     private var record:MutableMap<String, List<String>>? = null
     private var once:MutableMap<String, Any>? = null
+    private var update:MutableMap<String, Any>? = null
     private var isOnce = false
     internal fun view(v: HTMLElement){
         view = if(pos.isNotEmpty()) {
             var t = v
-            for (i in pos) t = t.getChildAt(i)!!
+            var i = pos.size
+            while(i-- > 0) t = t.getChildAt(pos[i])!!
             t
         }else v
         propVal?.clear()
@@ -34,29 +37,34 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
         it.forEach {(k, v) ->
             when {
                 v is String && v[0] == '@' -> viewmodel(k, v.substring(2, v.length - 1).split("."))
-                else -> set(k.toLowerCase(), v)
+                else -> set(k, v)
             }
         }
     }
     override operator fun set(k:String, v:Any):Boolean{
         if(v === OBJECT ||v === ARRAY) return true
         val V = "$v"
+        if(k == "focus") println("update0 $k, $V, ${V.substring(7)}")
         when {
             k == "key"->key = V
             k == "style" ->V.split(",").map{it.trim()}.forEach{ ChStyle[it]?.let{style(it)}}
+            v is Ch.Update->{
+                if(update == null) update = mutableMapOf()
+                update?.put(k, v.v)
+            }
             else -> {
                 if(once == null) once = mutableMapOf()
-                once?.put(k, V)
+                once?.put(k, if(v is Ch.Once) v.v else v)
             }
         }
         return true
     }
     override fun viewmodel(k:String, v: List<String>):Boolean{
+        val target = ChModel[v]
         when(k) {
             "style" -> {
                 val m = mutableMapOf<String, Any>()
                 val key = "@{" + v.joinToString(".")
-                val target = ChModel[v]
                 (target as? ChViewModel)?.let {
                     val model = it.asDynamic()
                     @Suppress("UnsafeCastFromDynamic")
@@ -66,13 +74,16 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
                 }
                 if (m.isNotEmpty()) style(m)
             }
-            "template" -> template = ChModel[v] as TemplateData
-            else -> {
-                if (prop == null) {
-                    prop = mutableMapOf()
-                    propVal = mutableMapOf()
+            "template" -> template = target as TemplateData
+            else ->{
+                if(target is Ch.Once || target is Ch.Update) set(k, target)
+                else {
+                    if (prop == null) {
+                        prop = mutableMapOf()
+                        propVal = mutableMapOf()
+                    }
+                    prop?.put(k, v)
                 }
-                prop?.put(k, v)
             }
         }
         return true
@@ -91,6 +102,10 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
                 isRender = true
                 col.putAll(it)
             }
+        }
+        update?.let{
+            isRender = true
+            col.putAll(it)
         }
         prop?.let{
             it.forEach {(k, _v) ->
