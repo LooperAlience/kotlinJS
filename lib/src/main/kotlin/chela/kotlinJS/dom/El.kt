@@ -18,7 +18,7 @@ import kotlin.browser.document
 import kotlin.browser.window
 
 typealias domEvent = (Event, HTMLElement)->Unit
-class El(val el:HTMLElement){
+class El(val el:HTMLElement, val record:dynamic = null){
     companion object {
         private val event = run{
             val win = window.asDynamic()
@@ -33,7 +33,7 @@ class El(val el:HTMLElement){
         private val keys = mutableMapOf<String, String>()
 
         private val scroll = mutableListOf<(Double, Double)->Boolean>()
-        private fun scrollInit(){
+        private fun scrollAdd(f:(Double, Double)->Boolean){
             if(scroll.isEmpty()){
                 val f = Ch.throttle{_, _->
                     val x = window.scrollX
@@ -45,9 +45,11 @@ class El(val el:HTMLElement){
                 }
                 window.addEventListener("scroll", {f()})
             }
+            scroll += f
         }
 
-        private val prop = mutableMapOf<String, (El, HTMLElement, String, String)->Unit>(
+        @Suppress("UnsafeCastFromDynamic")
+        private val prop = mutableMapOf<String, (El, HTMLElement, String, dynamic)->Unit>(
             "className" to {self, el, _, v-> el.className = v},
             "html" to {self, el, _, v-> el.innerHTML = v},
             "+html" to {self, el, _, v-> el.innerHTML = v + el.innerHTML},
@@ -70,15 +72,16 @@ class El(val el:HTMLElement){
                     el.removeAttribute("onselectstart")
                 }
             },
-            "value" to {self, el, _, v->v?.let{
-                el.setAttribute("value", v)
-                (el as? HTMLSelectElement)?.let{it.value = v } ?:
-                (el as? HTMLInputElement)?.let{it.value = v }
-            } ?: run{
-                el.removeAttribute("value")
-                (el as? HTMLSelectElement)?.let{it.value = ""} ?:
-                (el as? HTMLInputElement)?.let{it.value = ""}
-            }
+            "value" to {self, el, _, v->
+                v?.let{
+                    el.setAttribute("value", v)
+                    (el as? HTMLSelectElement)?.let{it.value = v } ?:
+                    (el as? HTMLInputElement)?.let{it.value = v }
+                } ?: run{
+                    el.removeAttribute("value")
+                    (el as? HTMLSelectElement)?.let{it.value = ""} ?:
+                    (el as? HTMLInputElement)?.let{it.value = ""}
+                }
             },
             "A" to {self, el, k, v-> el.setAttribute(k, v)},
             "lazySrc" to {self, el, k, v->
@@ -87,12 +90,19 @@ class El(val el:HTMLElement){
                     el.setAttribute("src", src[1])
                 }else{
                     el.setAttribute("src", src[0])
-                    scrollInit()
-                    scroll += { x, y ->
+                    scrollAdd{ x, y ->
                         val r = window.innerHeight + 50 < el.getBoundingClientRect().top
                         if (!r) el.setAttribute("src", src[1])
                         r
                     }
+                }
+            },
+            "topViewPort" to {self, el, k, v->
+                if(window.innerHeight > el.getBoundingClientRect().top) v()
+                else scrollAdd{ x, y ->
+                    val r = window.innerHeight < el.getBoundingClientRect().top
+                    if(!r) v()
+                    r
                 }
             }
         )
@@ -101,14 +111,28 @@ class El(val el:HTMLElement){
     operator fun set(k:String, _v:Any){
         if(_v == undefined) return
         if(k == "template"){
-            (_v as? TemplateData)?.let {ChTemplate.render(el, it.data, it.templates)}
+            (_v as? TemplateData)?.let{ChTemplate.render(el, it.data, it.templates)}
             return
         }
-        val v = if(_v is String && _v[0] == '@') ChModel[_v.substring(2, _v.length - 1)] else _v
-        val s = "$v"
-        prop["${k[0]}"]?.let {it(this, el, k.substring(1), s)} ?: prop[k]?.let{it(this, el, k, s)} ?: run{
+        val v = if(_v == "null") null
+            else if(_v !is String) _v
+            else when(_v[0]){
+                '@'->ChModel[_v.substring(2, _v.length - 1)]
+                '$'->record?.let{
+                    val k = "$_v".substring(2, _v.length - 1)
+                    if(k.isBlank()) record
+                    else{
+                        var t = record
+                        k.split(".").forEach {t = t[it]}
+                        t
+                    }
+                } ?: throw Throwable("no record")
+                else-> _v
+            }
+        prop["${k[0]}"]?.let {it(this, el, k.substring(1), v)} ?: prop[k]?.let{it(this, el, k, v)} ?:
+        run{
             val kk = keys[k] ?: key(k)
-            if (kk != "") elStyle[kk] = if (s == "null") null else s
+            if(kk != "") elStyle[kk] = v
             else eventKey(k)?.let{k->
                 @Suppress("UNCHECKED_CAST")
                 if(v == "null"){

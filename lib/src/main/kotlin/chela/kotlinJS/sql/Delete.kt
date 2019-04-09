@@ -87,7 +87,7 @@ internal class Delete: Query(){
             map.forEach{(k, t)->
                 val target = if(i > 0 && wSep?.get(i - 1) == "or") or else where
                 val tv = t.second
-                val v = wData?.get(k)?.let { args[it] ?: throw Throwable("error") }
+                val v = wData?.get(k)?.let { args[it] ?: throw Throwable("no arg $k") }
                 target[k] = when (t.first) {
                     "=", "in" -> v
                     ">", "<", "!=", ">=", "<=" ->{
