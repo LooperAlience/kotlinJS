@@ -1,10 +1,12 @@
 package chela.kotlinJS.dom
 
+import chela.kotlinJS.Ch
 import chela.kotlinJS.core.ChJS.isIn
 import chela.kotlinJS.core.delete
 import chela.kotlinJS.core.uuid
 import chela.kotlinJS.model.ChModel
 import chela.kotlinJS.regex.reStyle
+import chela.kotlinJS.throttleF
 import chela.kotlinJS.view.scanner.template.ChTemplate
 import chela.kotlinJS.view.scanner.template.TemplateData
 import org.w3c.dom.HTMLElement
@@ -25,47 +27,77 @@ class El(val el:HTMLElement){
         }
         private val body = document.body
         private val bodyStyle = document.body?.style
+
         private val prefix = "webkit,Moz,chrome,ms".split(',')
         private val evKey = mutableMapOf<String, String?>()
         private val keys = mutableMapOf<String, String>()
-        private val prop = mutableMapOf<String, (El, HTMLElement, String, String)->Unit>(
-                "className" to {self, el, _, v-> el.className = v},
-                "html" to {self, el, _, v-> el.innerHTML = v},
-                "+html" to {self, el, _, v-> el.innerHTML = v + el.innerHTML},
-                "html+" to {self, el, _, v-> el.innerHTML += v},
-                "submit" to {self, el, _, _->(el as? HTMLFormElement)?.let{it.submit()}},
-                "focus" to {self, el, _, v-> if(v == "true") el.focus()},
-                "blur" to {self, el, _, _-> el.blur()},
-                "checked" to {self, el, _, v->(el as? HTMLInputElement)?.let{it.checked = v == "true"}},
-                "selected" to {self, el, _, v->if(v == "false") (el as? HTMLSelectElement)?.let{it.selectedIndex = -1}},
-                "unselect" to {self, el, _, v->
-                    if(v == "true"){
-                        self["user-select"] = "none"
-                        self["touch-callout"] = "none"
-                        el.setAttribute("unselectable", "on")
-                        el.setAttribute("onselectstart", "return false")
-                    }else{
-                        self["user-select"] = "null"
-                        self["touch-callout"] = "null"
-                        el.removeAttribute("unselectable")
-                        el.removeAttribute("onselectstart")
+
+        private val scroll = mutableListOf<(Double, Double)->Boolean>()
+        private fun scrollInit(){
+            if(scroll.isEmpty()){
+                val f = Ch.throttle{_, _->
+                    val x = window.scrollX
+                    val y = window.scrollY
+                    var i = scroll.size
+                    while(i-- > 0){
+                        if(!scroll[i](x, y)) scroll.removeAt(i)
                     }
-                },
-                "value" to {self, el, _, v->v?.let{
-                    el.setAttribute("value", v)
-                    (el as? HTMLSelectElement)?.let{it.value = v } ?:
-                    (el as? HTMLInputElement)?.let{it.value = v }
-                } ?: run{
-                    el.removeAttribute("value")
-                    (el as? HTMLSelectElement)?.let{it.value = ""} ?:
-                    (el as? HTMLInputElement)?.let{it.value = ""}
                 }
-                },
-                "A" to {self, el, k, v-> el.setAttribute(k, v)}
+                window.addEventListener("scroll", {f()})
+            }
+        }
+
+        private val prop = mutableMapOf<String, (El, HTMLElement, String, String)->Unit>(
+            "className" to {self, el, _, v-> el.className = v},
+            "html" to {self, el, _, v-> el.innerHTML = v},
+            "+html" to {self, el, _, v-> el.innerHTML = v + el.innerHTML},
+            "html+" to {self, el, _, v-> el.innerHTML += v},
+            "submit" to {self, el, _, _->(el as? HTMLFormElement)?.let{it.submit()}},
+            "focus" to {self, el, _, v-> if(v == "true") el.focus()},
+            "blur" to {self, el, _, _-> el.blur()},
+            "checked" to {self, el, _, v->(el as? HTMLInputElement)?.let{it.checked = v == "true"}},
+            "selected" to {self, el, _, v->if(v == "false") (el as? HTMLSelectElement)?.let{it.selectedIndex = -1}},
+            "unselect" to {self, el, _, v->
+                if(v == "true"){
+                    self["user-select"] = "none"
+                    self["touch-callout"] = "none"
+                    el.setAttribute("unselectable", "on")
+                    el.setAttribute("onselectstart", "return false")
+                }else{
+                    self["user-select"] = "null"
+                    self["touch-callout"] = "null"
+                    el.removeAttribute("unselectable")
+                    el.removeAttribute("onselectstart")
+                }
+            },
+            "value" to {self, el, _, v->v?.let{
+                el.setAttribute("value", v)
+                (el as? HTMLSelectElement)?.let{it.value = v } ?:
+                (el as? HTMLInputElement)?.let{it.value = v }
+            } ?: run{
+                el.removeAttribute("value")
+                (el as? HTMLSelectElement)?.let{it.value = ""} ?:
+                (el as? HTMLInputElement)?.let{it.value = ""}
+            }
+            },
+            "A" to {self, el, k, v-> el.setAttribute(k, v)},
+            "lazySrc" to {self, el, k, v->
+                val src = v.split(" ")
+                if(window.innerHeight + 100 > el.getBoundingClientRect().top){
+                    el.setAttribute("src", src[1])
+                }else{
+                    el.setAttribute("src", src[0])
+                    scrollInit()
+                    scroll += { x, y ->
+                        val r = window.innerHeight + 50 < el.getBoundingClientRect().top
+                        if (!r) el.setAttribute("src", src[1])
+                        r
+                    }
+                }
+            }
         )
     }
     private var elStyle = el.style.asDynamic()
-
     operator fun set(k:String, _v:Any){
         if(_v == undefined) return
         if(k == "template"){

@@ -103,10 +103,7 @@ internal class Delete: Query(){
                 i++
             }
         }
-        println("delete query")
-        println(JSON.stringify(r))
         return ChJS.then(DataBase.connection.remove(r)) {
-            println("deleted!!")
             null
         }!!
     }

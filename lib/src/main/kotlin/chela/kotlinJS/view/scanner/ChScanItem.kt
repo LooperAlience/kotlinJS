@@ -44,7 +44,6 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
     override operator fun set(k:String, v:Any):Boolean{
         if(v === OBJECT ||v === ARRAY) return true
         val V = "$v"
-        if(k == "focus") println("update0 $k, $V, ${V.substring(7)}")
         when {
             k == "key"->key = V
             k == "style" ->V.split(",").map{it.trim()}.forEach{ ChStyle[it]?.let{style(it)}}
@@ -128,9 +127,11 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
             isRender = true
             record?.forEach {(k, keys)->
                 var v = data
-                keys.forEach{v = v[it]}
+                if(keys[0] != "") keys.forEach{v = v[it]}
                 when(k){
-                    "style"->{objForEach(v){k, v->col[k] = v}}
+                    "style"->{
+                        objForEach(v){k, v->col[k] = v}
+                    }
                     else->col[k] = v
                 }
             }

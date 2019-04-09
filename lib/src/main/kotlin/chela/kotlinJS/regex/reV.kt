@@ -13,7 +13,7 @@ object reV: ChRegex(
     //6-ChModel
     """(?:\@\{([^}]+)\})|"""+
     //7-record
-    """(?:\$\{([^}]+)\}))\s*"""
+    """(?:\$\{([^}]*)\}))\s*"""
 ){
     fun group3(it:MatchGroup):Double{
         val v = it.value
