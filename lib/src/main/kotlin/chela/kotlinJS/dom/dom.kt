@@ -23,20 +23,18 @@ object ChDom{
     }
     fun tag2html(txt:String):HTMLElement{
         val tag = txt.substring(1, txt.indexOf('>')).split(' ')[0].toUpperCase()
-        inline fun t2h(el:Element, depth:Boolean):Element?{
+        inline fun t2h(el:Element, depth:Boolean):HTMLElement?{
             el.innerHTML = txt
             var v = el
             var limit = 20
             while(v.firstElementChild?.let{
                 v = it
-                if(v.tagName == tag) return v
+                if(v.tagName == tag) return v as HTMLElement
                 depth
             } == true && limit-- > 0){}
             return null
         }
-        t2h(body, false)
-        t2h(table, true)
-        t2h(select, true)
-        throw Throwable("invalid Tag:$txt")
+        return t2h(body, false) ?: t2h(table, true) ?: t2h(select, true) ?:
+            throw Throwable("invalid Tag:$txt")
     }
 }
