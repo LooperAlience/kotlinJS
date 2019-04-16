@@ -1,10 +1,8 @@
 package chela.kotlinJS.view.router
 
-import chela.kotlinJS.core._allStack
 import chela.kotlinJS.core._pop
 import chela.kotlinJS.view.router.holder.ChHolder
 import chela.kotlinJS.view.router.holder.ChHolderBase
-import kotlin.browser.window
 
 class ChRouter<T>(private val base: ChHolderBase<T>){
     init{base.router = this}
@@ -46,6 +44,10 @@ class ChRouter<T>(private val base: ChHolderBase<T>){
         }
         else -> false
     }
-    fun clear() = stack.clear()
+    fun clear(){
+        stack.clear()
+        keys.clear()
+        base.clear()
+    }
     fun action(key:String, vararg arg:Any) = if(stack.isNotEmpty()) stack.last().action(key, arg) else false
 }

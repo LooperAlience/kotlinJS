@@ -21,4 +21,16 @@ class ChGroupBase(group:HTMLElement): ChHolderBase<HTMLElement>(){
             if(group.childElementCount == 0) group.style.display = "none"
         }
     }
+    override fun take(index:Int, holder: ChHolder<HTMLElement>){
+        var el = group.firstElementChild
+        var i = 0
+        while(i < 10000 && el != null){
+            if(i == index){
+                group.removeChild(el)
+            }else el = el.nextElementSibling
+        }
+    }
+    override fun clear() {
+        group.innerHTML = ""
+    }
 }
