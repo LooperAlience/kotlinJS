@@ -8,9 +8,10 @@ class I18n(v:dynamic){
     var isOne = ""
     val data = mutableMapOf<String, Map<String, String>>()
     init{
-        if(v.isOne != undefined) isOne = v.isOne
-        if(v.data != undefined) keys(v.data){data[it] = obj2map(v.data[it]){_, v->v}}
-        println()
+        keys(v){
+            if(it == "default") isOne = v.default
+            else data[it] = obj2map(v.data[it]){_, v->v}
+        }
     }
     fun set(k:String) = data.let{ChI18n.add(k, this)}
     fun remove(k:String) = ChI18n.remove(k)
