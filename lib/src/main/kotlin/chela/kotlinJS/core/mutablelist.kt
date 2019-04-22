@@ -1,7 +1,7 @@
 package chela.kotlinJS.core
 
-internal fun <T> MutableList<T>._shift():T? = if(this.isNotEmpty()) this.removeAt(0) else null
-internal fun <T> MutableList<T>._pop():T = this.removeAt(this.size - 1)
+fun <T> MutableList<T>._shift():T? = if(this.isNotEmpty()) this.removeAt(0) else null
+fun <T> MutableList<T>._pop():T = this.removeAt(this.size - 1)
 internal inline fun <T> MutableList<T>._notEmpty(block:(MutableList<T>)->Unit){
     if(this.isNotEmpty()) block(this)
 }

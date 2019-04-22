@@ -8,6 +8,7 @@ class ChRouter<T>(private val base: ChHolderBase<T>){
     init{base.router = this}
     private val stack = mutableListOf<ChHolder<T>>()
     private val keys = mutableListOf<String>()
+    val size:Int get() = stack.size
     val isFinal:Boolean get() = stack.size < 2
     fun restore(){stack.forEach{base._push(it, true)}}
     fun push(holder: ChHolder<T>, key:String? = null){
@@ -39,7 +40,7 @@ class ChRouter<T>(private val base: ChHolderBase<T>){
         keys.size == 0 -> false
         keys.last() == key -> true
         keys.size > 1 && keys[keys.size - 2] == key -> {
-            pop()
+            //pop()
             true
         }
         else -> false
