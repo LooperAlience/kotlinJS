@@ -1,5 +1,6 @@
 package chela.kotlinJS.model
 
+import chela.kotlinJS.cdata.ChCdata
 import chela.kotlinJS.i18n.ChI18n
 
 object ChModel{
@@ -8,6 +9,7 @@ object ChModel{
     operator fun get(v:List<String>):Any{
         if(v.isEmpty()) throw Exception("invalid list size == 0")
         if(v[0] == "i18n") return ChI18n.get(v)
+        else if(v[0] == "cdata") return ChCdata[v[1]] ?: "no data:${v[1]}"
         repo[v[0]]?.let { return find(v, it) } ?: run{
 
 
