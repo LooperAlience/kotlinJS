@@ -1,11 +1,10 @@
-package chela.kotlin.resource
+package chela.kotlinJS.resource
 
+import chela.kotlinJS.cdata.Cdata
+import chela.kotlinJS.cdata.ChCdata
 import chela.kotlinJS.core.ChJS
 import chela.kotlinJS.core.ChJS.keys
 import chela.kotlinJS.i18n.ChI18n
-import chela.kotlinJS.resource.Api
-import chela.kotlinJS.resource.Db
-import chela.kotlinJS.resource.I18n
 import chela.kotlinJS.sql.ChSql
 import kotlin.js.Promise
 
@@ -22,6 +21,13 @@ object ChRes{
         }
         if(v.query != null) ChJS.objForEach(v.query){k, v->ChSql.addQuery(k,"${if (v is String) v else v.join(" ")}")}
         if(v.db != null) ChJS.objForEach(v.db){k, v->Db(v).set(k)}
+        if(v.cdata != null){
+            ChJS.objForEach(v.cdata){k, v ->
+                if(k.startsWith("@@")) ChCdata.catDefault[k.substring(1)] = v
+                else if(k[0] == '@') ChCdata(k, v)
+                else Cdata(k, v)
+            }
+        }
     }
     fun load(res:dynamic) {
         ChSql.db("ch").then {db->

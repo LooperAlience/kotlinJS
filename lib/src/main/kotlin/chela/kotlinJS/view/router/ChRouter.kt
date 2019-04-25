@@ -40,7 +40,7 @@ class ChRouter<T>(private val base: ChHolderBase<T>){
         keys.size == 0 -> false
         keys.last() == key -> true
         keys.size > 1 && keys[keys.size - 2] == key -> {
-            //pop()
+            pop()
             true
         }
         else -> false

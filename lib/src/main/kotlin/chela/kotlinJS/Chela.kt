@@ -1,6 +1,6 @@
 package chela.kotlinJS
 
-import chela.kotlin.resource.ChRes
+import chela.kotlinJS.resource.ChRes
 import chela.kotlinJS.dom.domEvent
 import chela.kotlinJS.looper.ChLooper
 import chela.kotlinJS.model.ChModel
@@ -16,10 +16,8 @@ import chela.kotlinJS.view.scanner.ChScanner
 import chela.kotlinJS.view.scanner.template.ChTemplate
 import chela.kotlinJS.view.scanner.template.TemplateData
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.Window
 import org.w3c.dom.events.Event
 import kotlin.browser.window
-import kotlin.js.Date
 import kotlin.js.Promise
 
 typealias throttleF = (Double, Array<out Any>)->Unit
