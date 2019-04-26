@@ -57,14 +57,18 @@ object Ch{
         protected abstract fun setDB(db:DataBase, res:ChResponse):Promise<dynamic>
         protected abstract fun getData(v:dynamic)
         fun data(){
+            println("a")
             if(data.containsKey(key) && isValid(data[key])) getData(data[key])
             else{
+                println("b")
                 data.remove(key)
                 ChSql.db(db).then{db->
                     getDB(db).then{v:dynamic->
                         if(isValid(v)){
+                            println("c")
                             ChRes.res(v)
                             data[key] = v
+                            println("d")
                             data()
                         }else Ch.net.api(api, *arg){res ->setDB(db, res).then{it:dynamic->data()}}
                     }

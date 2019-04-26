@@ -127,7 +127,15 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
             isRender = true
             record?.forEach {(k, keys)->
                 var v = data
-                if(keys[0] != "") keys.forEach{v = v[it]}
+                if(keys[0] != ""){
+                    keys.all{
+                        if(v == null) false
+                        else {
+                            v = v[it]
+                            true
+                        }
+                    }
+                }
                 when(k){
                     "style"->{
                         objForEach(v){k, v->col[k] = v}
