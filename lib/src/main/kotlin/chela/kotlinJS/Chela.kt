@@ -4,6 +4,7 @@ import chela.kotlinJS.resource.ChRes
 import chela.kotlinJS.dom.domEvent
 import chela.kotlinJS.looper.ChLooper
 import chela.kotlinJS.model.ChModel
+import chela.kotlinJS.model.Model
 import chela.kotlinJS.net.ChNet
 import chela.kotlinJS.net.ChResponse
 import chela.kotlinJS.sql.ChSql
@@ -82,7 +83,18 @@ object Ch{
     fun looper() = ChLooper()
     fun <T> router(base: ChHolderBase<T>) = ChRouter(base)
     fun router(el:HTMLElement) = ChRouter(ChGroupBase(el))
-
+    fun value(_v:Any, data: Model? = null):Any{
+        var v = _v
+        while(v is String && v.isNotBlank()){
+            v = when(v[0]){
+                '@'->ChModel.get(v.substring(2, v.length - 1))
+                '$'->if(data != null) ChModel.record(("_." + v.substring(2, v.length - 1)).split("."), data)
+                else throw Throwable("record but no data $v")
+                else-> return v
+            }
+        }
+        return v
+    }
     fun throttle(rate:Double, vararg arg:Any, block:throttleF):()->Unit{
         var timeOutId = -1
         var next = 0.0
