@@ -12,9 +12,16 @@ object ChModel{
             throw Exception("invalid key:" + v[0])
         }
     }
-    fun record(v: List<String>, record: Model): Any {
+    fun record(v: List<String>, record: dynamic): Any {
         if (v.isEmpty()) throw Exception("invalid list size == 0")
-        return find(v, record)
+        var r = record
+        v.all{
+            if(r[it] != undefined){
+                r = r[it]
+                true
+            }else false
+        }
+        return r
     }
     private fun find(v: List<String>, it: Model): Any {
         var model: Model? = it

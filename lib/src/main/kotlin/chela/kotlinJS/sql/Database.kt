@@ -4,9 +4,9 @@ import chela.kotlinJS.core.ChJS.obj
 import chela.kotlinJS.core.ChJS.then
 import kotlin.js.Promise
 
-class DataBase internal     constructor(private val db:String, ver:Int, private val create: Array<out String>, private val upgrade:String = ""){
+class DataBase internal constructor(private val db:String, ver:Int, private val create: Array<out String>, private val upgrade:String = ""){
     companion object {
-        internal val connection:dynamic = js("new JsStore.Instance(new Worker('js/sqlworker.js'))")
+        val connection:dynamic = js("new JsStore.Instance(new Worker('js/sqlworker.js'))")
         private val rCreate = """^create +table(?: +if +not +exists)? +([a-zA-Z0-9_]+) *\(\s*((?:\s|\S)+)\)$""".toRegex()
         private var rColumn = """ *([a-zA-Z_]+) +([a-z0-9()]+)(?: +(?:(not null)|(primary key)|(autoincrement)|(unique)|(default += +[a-zA-Z0-9])))*""".toRegex()
         @Suppress("UnsafeCastFromDynamic")

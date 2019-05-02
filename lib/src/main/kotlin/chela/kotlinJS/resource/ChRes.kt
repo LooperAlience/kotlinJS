@@ -4,7 +4,6 @@ import chela.kotlinJS.cdata.Cdata
 import chela.kotlinJS.cdata.ChCdata
 import chela.kotlinJS.core.ChJS
 import chela.kotlinJS.core.ChJS.keys
-import chela.kotlinJS.i18n.ChI18n
 import chela.kotlinJS.sql.ChSql
 import kotlin.js.Promise
 
@@ -46,7 +45,7 @@ object ChRes{
                 id varchar(255) not null,
                 contents text not null
             )
-        """.trimIndent())
+        """)
         ChSql.addQuery("getRes", "select id, contents from ch_res")
         ChSql.addQuery("isRes", "select id from ch_res where id=@id@")
         ChSql.addQuery("addRes", "insert into ch_res(id, contents)values(@id@, @contents@)")
@@ -58,7 +57,8 @@ object ChRes{
                     val r = js("{}")
                     it.forEach{r[it.id] = JSON.parse(it.contents)}
                     load(r)
-                }else if(base != null) load(base)
+                }
+                else if(base != null) load(base)
                 inited = true
                 res(0)
             }

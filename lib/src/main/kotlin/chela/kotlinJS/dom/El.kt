@@ -74,11 +74,11 @@ class El(val el:HTMLElement, val record:dynamic = null){
                 }
             },
             "value" to {self, el, _, v->
-                v?.let{
+                if(v != null){
                     el.setAttribute("value", v)
                     (el as? HTMLSelectElement)?.let{it.value = v } ?:
                     (el as? HTMLInputElement)?.let{it.value = v }
-                } ?: run{
+                }else{
                     el.removeAttribute("value")
                     (el as? HTMLSelectElement)?.let{it.value = ""} ?:
                     (el as? HTMLInputElement)?.let{it.value = ""}

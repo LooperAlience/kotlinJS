@@ -24,21 +24,23 @@ object ChCdata{
     val req = mutableMapOf<String, MutableSet<String>>()
     private val rex = """\{|\}| """.toRegex()
     @Suppress("UnsafeCastFromDynamic")
-    val requestKey:Promise<String?> get() = if(req.isEmpty()) Promise.resolve<String?>(null) else Promise{res,_->
-        ChSql.db("ch").then{db->
-            Promise.all(req.map { (k,v)->
-                db.query("getCdata", "id" to "$k=${"$v".replace(rex, "")}").then{arr->
-                    arr?.let{
-                        _try{JSON.parse<dynamic>(it[0][0])}?.let{json->
-                            objForEach(json){k, v->
+    val requestKey:Promise<String?> get() = if(req.isEmpty()) Promise.resolve<String?>(null) else Promise { res, _ ->
+        ChSql.db("ch").then { db ->
+            val r = req.map{(k, v) ->
+                db.query("getCdata", "id" to "$k=${"$v".replace(rex, "")}").then { arr ->
+                    arr?.let {
+                        _try { JSON.parse<dynamic>(it[0][0]) }?.let { json ->
+                            objForEach(json) { k, v ->
                                 Cdata(k, v)
                                 req.remove(k)
                             }
                         }
                     }
+                    1
                 }
-            }.toTypedArray()).then{
-                val r ="$req".replace(rex, "")
+            }.toTypedArray()
+            Promise.all(r).then {
+                val r = "$req".replace(rex, "")
                 req.clear()
                 res(r)
             }

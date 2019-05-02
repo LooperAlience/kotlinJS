@@ -86,7 +86,7 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
         record?.put(k, v)
         return true
     }
-    fun render(data:Model? = null):Map<String, Any>?{
+    fun render(data:dynamic? = null):Map<String, Any>?{
         val r = mutableMapOf<String, Any>()
         if(!isOnce){
             isOnce = true
