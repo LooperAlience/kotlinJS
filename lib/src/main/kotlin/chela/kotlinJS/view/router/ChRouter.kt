@@ -4,8 +4,7 @@ import chela.kotlinJS.core._pop
 import chela.kotlinJS.view.router.holder.ChHolder
 import chela.kotlinJS.view.router.holder.ChHolderBase
 
-class ChRouter<T>(val base: ChHolderBase<T>){
-    init{base.router = this}
+class ChRouter<T, R:ChHolderBase<T>>(val base:R){
     private val stack = mutableListOf<ChHolder<T>>()
     private val keys = mutableListOf<String>()
     val size:Int get() = stack.size

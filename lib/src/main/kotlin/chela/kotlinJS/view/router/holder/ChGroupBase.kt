@@ -9,7 +9,6 @@ class ChGroupBase(group:HTMLElement): ChHolderBase<HTMLElement>(){
         display = d
         group = it
         group.innerHTML = ""
-        restore()
     }
     override fun push(holder: ChHolder<HTMLElement>){
         group.appendChild(holder.create(this))

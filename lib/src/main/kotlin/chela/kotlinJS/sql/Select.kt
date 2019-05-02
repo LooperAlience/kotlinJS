@@ -7,12 +7,12 @@ internal class Select: Query(){
     companion object {
         private val rSelect = """^\s*select([\s\S]+?)\s+from([\s\S]+?)\s*$""".toRegex()
         private val rLimit = """\slimit\s+([0-9]+)$""".toRegex()
-        private val rOrder = """\sorder\s+oby\s+([\S]+)(?:\s+(desc|asc))?$""".toRegex()
-        private val rGroup = """\sgroup\s+oby\s+(.+?)\s*$""".toRegex()
+        private val rOrder = """\sorder\s+by\s+([\S]+)(?:\s+(desc|asc))?$""".toRegex()
+        private val rGroup = """\sgroup\s+by\s+(.+?)\s*$""".toRegex()
         private val rWhere = """\swhere\s+([\s\S]+?)\s*$""".toRegex()
         private val rJoin = """\s+(?:inner\s+join\s+.+\s+on\s+.+\s*)+""".toRegex()
         private val rAndOr = """\s(and|or)\s""".toRegex()
-        private val rWhereItem = """^\s*([0-9a-zA-Z_.]+)\s*(?:(?:(=|!=|[<>]=?)\s*(.+))|like +'(%)?(\S)+(%)?'|in\s*\(([^)]|\s)+\))\s*$""".toRegex()
+        private val rWhereItem = """^\s*([0-9a-zA-Z_.]+)\s*(?:(?:(=|!=|[<>]=?)\s*(.+))|like +'(%)?([^%]+)(%)?'|in\s*\(([^)]|\s)+\))\s*$""".toRegex()
         private val rAggregate = """(count|sum|avg|max|min)\(([^)]+)\)""".toRegex()
         private val join = """\sinner\s+join\s+([a-zA-Z0-9_]+)(?:\s+([a-zA-Z0-9_]+))?\s+on\s+([a-zA-Z0-9_]+\.[a-zA-Z0-9_]+)\s*=\s*([a-zA-Z0-9_]+\.[a-zA-Z0-9_]+)""".toRegex()
 
@@ -72,11 +72,8 @@ internal class Select: Query(){
                                 else -> gv[3].toDouble()
                             }
                             else if (gv[5] != "") {
-                                if (gv[5].contains('@')) data[k] = gv[3].replace("@", "").replace("%", "")
-                                val t = if (gv[4] == "%" && gv[6] == "%") "%like%"
-                                else if (gv[4] == "%") "%like"
-                                else "like%"
-                                t to gv[4] + gv[5] + gv[6]
+                                if (gv[5].contains('@')) data[k] = gv[5].replace("@", "")
+                                gv[4] + "like" + gv[6] to gv[5]
                             } else {
                                 "in" to if (gv[7][0] == '@') {
                                     data[k] = gv[7].replace("@", "")
@@ -136,30 +133,34 @@ internal class Select: Query(){
             }
         }
         wItem?.let {map->
-            val where = js("{}")
-            r.where = where
-            val or = if(wSep?.contains("or") == true) js("{}") else null
-            if(or != null) where.or = or
-            var i = 0
-            map.forEach{(k, t)->
-                val target = if(i > 0 && wSep?.get(i - 1) == "or") or else where
-                val tv = t.second
-                val v = wData?.get(k)?.let { args[it] ?: throw Throwable("error") }
-                target[k] = when (t.first) {
-                    "=", "in" -> v
-                    ">", "<", "!=", ">=", "<=" ->{
-                        val o = obj{}
-                        o[t.first] = v ?: tv
-                        o
-                    }
-                    "%like%" -> v?.let { "%$v%" }
-                    "%like" -> v?.let { "%$v" }
-                    "like%" -> v?.let { "$v%" }
-                    else -> null
-                } ?: tv
-                i++
+            if(map.isNotEmpty()) {
+                val where = js("{}")
+                r.where = where
+                val or = if (wSep?.contains("or") == true) js("{}") else null
+                if (or != null) where.or = or
+                var i = 0
+                @Suppress("UnsafeCastFromDynamic")
+                map.forEach { (k, t) ->
+                    val target = if (i > 0 && wSep?.get(i - 1) == "or") or else where
+                    val tv = t.second
+                    val v = wData?.get(k)?.let { args[it] ?: throw Throwable("error") }
+                    target[k] = when (t.first) {
+                        "=", "in" -> v
+                        ">", "<", "!=", ">=", "<=" -> {
+                            val o = obj {}
+                            o[t.first] = v ?: tv
+                            o
+                        }
+                        "%like%" -> v?.let{obj{like = "%$v%"}}
+                        "%like" -> v?.let{obj{like = "%$v"}}
+                        "like%" -> v?.let{obj{like = "$v%"}}
+                        else -> null
+                    } ?: tv
+                    i++
+                }
             }
         }
+        //println("select - ${JSON.stringify(r)}")
         return ChJS.then(DataBase.connection.select(r)) {
             val r = it as Array<dynamic>
             fields?.let {f->

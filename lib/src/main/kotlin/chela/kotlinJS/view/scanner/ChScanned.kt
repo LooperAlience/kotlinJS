@@ -23,7 +23,10 @@ class ChScanned internal constructor(var view: HTMLElement, private val items:Mu
                 v.tmpl = template
                 v.view = this.view
                 val el = El(vi)
-                it.forEach{(k, v)->el[k] = v}
+                it.forEach{(k, v)->
+                    el[k] = v
+                    println("scanned redner $k, $v")
+                }
             }
         }
         return this.view

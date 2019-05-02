@@ -4,7 +4,6 @@ import chela.kotlinJS.view.router.ChRouter
 import kotlin.browser.window
 
 abstract class ChHolderBase<T>{
-    internal lateinit var router: ChRouter<T>
     internal fun _push(holder: ChHolder<T>, isRestore:Boolean){
         push(holder)
         holder.push(isRestore)
@@ -28,7 +27,6 @@ abstract class ChHolderBase<T>{
         take(index, holder)
         holder.take()
     }
-    protected fun restore(){router.restore()}
     protected open fun push(holder: ChHolder<T>){}
     open fun pop(holder: ChHolder<T>){}
     protected open fun pause(holder: ChHolder<T>){}

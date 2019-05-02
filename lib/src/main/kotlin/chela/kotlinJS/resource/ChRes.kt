@@ -15,10 +15,6 @@ object ChRes{
             val base = if(v.api.base != undefined) v.api.base else ""
             ChJS.objForEach(v.api) {k, v->Api(v, base).set(k)}
         }
-        if(v.i18n != null){
-            if(v.i18n.language != undefined) ChI18n(v.i18n.language)
-            ChJS.objForEach(v.i18n){k, v ->I18n(v).set(k)}
-        }
         if(v.query != null) ChJS.objForEach(v.query){k, v->ChSql.addQuery(k,"${if (v is String) v else v.join(" ")}")}
         if(v.db != null) ChJS.objForEach(v.db){k, v->Db(v).set(k)}
         if(v.cdata != null){
@@ -54,6 +50,7 @@ object ChRes{
         ChSql.addQuery("getRes", "select id, contents from ch_res")
         ChSql.addQuery("isRes", "select id from ch_res where id=@id@")
         ChSql.addQuery("addRes", "insert into ch_res(id, contents)values(@id@, @contents@)")
+        ChSql.addQuery("getCdata", "select contents from ch_res where id like '%@id@%' order by res_rowid desc limit 1")
         ChSql.addQuery("removeRes", "delete from ch_res where id=@id@")
         ChSql.db("ch").then{
             it.query("getRes").then{

@@ -1,5 +1,6 @@
 package chela.kotlinJS
 
+import chela.kotlinJS.cdata.ChCdata
 import chela.kotlinJS.resource.ChRes
 import chela.kotlinJS.dom.domEvent
 import chela.kotlinJS.looper.ChLooper
@@ -33,9 +34,10 @@ object Ch{
     val resource = ChRes
     val model = ChModel
     val scanner = ChScanner
+    val cdata = ChCdata
 
     class Update(val v:Any)
-    class Once(val v:Any)
+    class Once(val v:Any){var isRun = false}
     class ChEvent(val event: Event, val el:HTMLElement){
         private val eld = el.asDynamic()
         private val _data = eld.__chel__.data
@@ -48,31 +50,40 @@ object Ch{
             it.rerender(_data.view, index, length, data, false)
         }
     }
-    abstract class Data(val key:Any, val db:String, val api:String, val arg:Array<Pair<String, Any>> = arrayOf()){
+    abstract class Data(val key:Any, val db:String){
         companion object {
             private val data = mutableMapOf<Any, dynamic>()
         }
         protected abstract fun getDB(db:DataBase):Promise<dynamic>
         protected abstract fun isValid(v:dynamic):Boolean
-        protected abstract fun setDB(db:DataBase, res:ChResponse):Promise<dynamic>
-        protected abstract fun getData(v:dynamic)
-        fun data(){
-            println("a")
-            if(data.containsKey(key) && isValid(data[key])) getData(data[key])
+        protected abstract fun setDB(db:DataBase, res:ChResponse):Promise<Boolean>
+        protected abstract fun net():Promise<ChResponse>
+        protected abstract fun data(v:dynamic)
+        protected open fun renew(v:dynamic) = ChRes.res(v)
+        protected open fun error(){}
+        operator fun invoke(retry:Int = 3, database:DataBase? = null){
+            if(retry == 0){
+                error()
+                return
+            }
+            if(data.containsKey(key) && isValid(data[key])) data(data[key])
             else{
-                println("b")
                 data.remove(key)
-                ChSql.db(db).then{db->
+                val f:(DataBase)->Unit = {db->
                     getDB(db).then{v:dynamic->
                         if(isValid(v)){
-                            println("c")
-                            ChRes.res(v)
+                            renew(v)
                             data[key] = v
-                            println("d")
-                            data()
-                        }else Ch.net.api(api, *arg){res ->setDB(db, res).then{it:dynamic->data()}}
+                            data(v)
+                        }else net()
+                            .then{res->setDB(db, res)}
+                            .then{ it:dynamic->
+                                if(it) invoke(retry - 1, db)
+                                else error()
+                            }
                     }
                 }
+                database?.let{f(it)} ?: ChSql.db(db).then(f)
             }
         }
     }
