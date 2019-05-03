@@ -90,3 +90,5 @@ gradlew
 /test/build/kotlin/testjar-classes.txt
 /test/build/libs/test.jar
 /test/build/tmp/jar/MANIFEST.MF
+/test/build/kotlin/compileKotlin2Js/caches-js/lookups/*.tab_i
+/test/build/kotlin/compileKotlin2Js/caches-js/lookups/*.len

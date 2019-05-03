@@ -24,21 +24,23 @@ object ChRes{
             }
         }
     }
-    fun load(res:dynamic) {
+    fun load(v:dynamic) = Promise<dynamic>{ r, _->
         ChSql.db("ch").then {db->
-            keys(res){k->
+            keys(v){ k->
                 @Suppress("UnsafeCastFromDynamic")
-                if(k == "remove") res[k].forEach{v->db.query("removeRes", "id" to v)}
+                if(k == "remove") v[k].forEach{ v->db.query("removeRes", "id" to v)}
                 else{
-                    res(res[k])
+                    res(v[k])
                     db.query("isRes", "id" to k).then {
-                        if(it.isNullOrEmpty()) db.query("addRes", "id" to k, "contents" to JSON.stringify(res[k]))
+                        if(it.isNullOrEmpty()) db.query("addRes", "id" to k, "contents" to JSON.stringify(v[k]))
                     }
                 }
             }
+            r(0)
         }
     }
     fun init(base:dynamic = null) = Promise<dynamic>{res, _->
+        inited = true
         ChSql.addDb("ch", """
             create table if not exists ch_res(
                 res_rowid integer primary key autoincrement,
@@ -56,11 +58,9 @@ object ChRes{
                 if(!it.isNullOrEmpty()){
                     val r = js("{}")
                     it.forEach{r[it.id] = JSON.parse(it.contents)}
-                    load(r)
-                }
-                else if(base != null) load(base)
-                inited = true
-                res(0)
+                    load(r).then{v:Int->res(0)}
+                }else if(base != null) load(base).then{v:Int->res(0)}
+                else res(0)
             }
         }
     }

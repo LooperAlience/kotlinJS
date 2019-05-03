@@ -24,8 +24,8 @@ object ChCdata{
     val req = mutableMapOf<String, MutableSet<String>>()
     private val rex = """\{|\}| """.toRegex()
     @Suppress("UnsafeCastFromDynamic")
-    val requestKey:Promise<String?> get() = if(req.isEmpty()) Promise.resolve<String?>(null) else Promise { res, _ ->
-        ChSql.db("ch").then { db ->
+    val requestKey:Promise<String?> get() = if(req.isEmpty()) Promise.resolve<String?>(null) else Promise{res, _ ->
+        ChSql.db("ch").then {db->
             val r = req.map{(k, v) ->
                 db.query("getCdata", "id" to "$k=${"$v".replace(rex, "")}").then { arr ->
                     arr?.let {
@@ -56,10 +56,7 @@ object ChCdata{
             var isError = false
             objForEach(json){k, v->
                 if(!reCdata.isValidJSONKey(k)) isError = true
-                if(!isError){
-                    println("make from db - $k, ${JSON.stringify(v)}")
-                    Cdata(k, v)
-                }
+                if(!isError) Cdata(k, v)
             }
             if(isError) res("invalid json key - $k")
             else ChSql.db("ch").then{db ->

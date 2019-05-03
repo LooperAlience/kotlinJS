@@ -5,7 +5,7 @@ import chela.kotlinJS.core.ChJS.addJs
 object ChSql{
     private val queries = mutableMapOf<String, ChQuery>()
     private val Dbs = mutableMapOf<String, DataBase>()
-    fun init(path:String = "sql.js") = addJs(path)
+    fun init(path:String) = addJs(path)
     fun db(k:String) = Dbs[k]?.connect() ?: throw Throwable("invalid db $k")
     fun addDb(k:String, vararg create:String){
         if(Dbs[k] != null) throw Throwable("exist db:$k")
