@@ -19,7 +19,6 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
     private var propVal:MutableMap<String, Any>? = null
     private var template:TemplateData? = null
     private var record:MutableMap<String, List<String>>? = null
-    private var recordVal:MutableMap<String, Any>? = null
     private var once:MutableMap<String, Any>? = null
     private var update:MutableMap<String, Any>? = null
     private var isOnce = false
@@ -79,10 +78,7 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
         return true
     }
     override fun record(k:String, v: List<String>):Boolean{
-        if (record == null) {
-            record = mutableMapOf()
-            recordVal = mutableMapOf()
-        }
+        if (record == null) record = mutableMapOf()
         record?.put(k, v)
         return true
     }
@@ -122,19 +118,14 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
             val v = Ch.value(ChModel.record(_v, data))
             when{
                 k == "style" -> objForEach(v){k, v->
+                    println("record style $k - $v")
                     when(val sv = Ch.value(v ?: Ch.NONE)){
                         is Ch.Once -> if (!sv.isRun) {
                             r[k] = Ch.value(sv.v)
                             sv.isRun = true
                         }
                         is Ch.Update -> r[k] = Ch.value(sv.v)
-                        else -> recordVal?.let {
-                            val pv = it["style.$k"]
-                            if (pv == null || pv != sv) {
-                                r[k] = sv
-                                it["style.$k"] = sv
-                            }
-                        }
+                        else -> r[k] = sv
                     }
                 }
                 v is Ch.Once -> {
@@ -143,14 +134,7 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
                     record?.remove(k)
                 }
                 v is Ch.Update -> r[k] = Ch.value(v.v)
-                else -> {
-                    recordVal?.let {
-                        if (it[k] == null || it[k] != v){
-                            r[k] = v
-                            it[k] = v
-                        }
-                    }
-                }
+                else -> r[k] = v
             }
         }
         if(r.isNotEmpty()) r.forEach{(k, v)->
