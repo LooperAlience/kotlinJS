@@ -110,6 +110,7 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
                 }
             }
         }
+
         template?.let{
             r["template"] = it
         }
@@ -118,7 +119,6 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
             val v = Ch.value(ChModel.record(_v, data))
             when{
                 k == "style" -> objForEach(v){k, v->
-                    println("record style $k - $v")
                     when(val sv = Ch.value(v ?: Ch.NONE)){
                         is Ch.Once -> if (!sv.isRun) {
                             r[k] = Ch.value(sv.v)

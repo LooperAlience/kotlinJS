@@ -14,12 +14,16 @@ object ChModel{
     }
     fun record(v: List<String>, record: dynamic): Any {
         if (v.isEmpty()) throw Exception("invalid list size == 0")
+        if(v.size == 1 && v[0] == "") return record as Any
         var r = record
         v.all{
             if(r[it] != undefined){
                 r = r[it]
                 true
-            }else false
+            }else{
+                r = null
+                false
+            }
         }
         return r
     }
