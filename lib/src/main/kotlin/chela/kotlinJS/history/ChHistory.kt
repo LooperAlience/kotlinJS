@@ -17,8 +17,8 @@ abstract class ChHistory(private val default:String){
                 else->{
                     val idx = history.lastIndexOf(hash)
                     if(idx != -1) inHistory(idx, history.size)
-                    add(hash, history.size - 1)
                     history += hash
+                    add(hash, history.size - 1)
                 }
             }
             changed()
@@ -28,6 +28,7 @@ abstract class ChHistory(private val default:String){
     }
     fun pop() = history._pop()
     fun isEmpty() = history.isEmpty()
+    fun size() = history.size
     protected open fun same(){}
     protected open fun back(){}
     protected open fun inHistory(idx: Int, size: Int){}
