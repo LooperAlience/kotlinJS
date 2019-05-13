@@ -9,10 +9,7 @@ import chela.kotlinJS.regex.reStyle
 import chela.kotlinJS.throttleF
 import chela.kotlinJS.view.scanner.template.ChTemplate
 import chela.kotlinJS.view.scanner.template.TemplateData
-import org.w3c.dom.HTMLElement
-import org.w3c.dom.HTMLFormElement
-import org.w3c.dom.HTMLInputElement
-import org.w3c.dom.HTMLSelectElement
+import org.w3c.dom.*
 import org.w3c.dom.events.Event
 import kotlin.browser.document
 import kotlin.browser.window
@@ -205,9 +202,14 @@ class El(val el:HTMLElement, val record:dynamic = null){
         get() = (el as? HTMLInputElement)?.let{it.checked} ?: false
         set(v){(el as? HTMLInputElement)?.let{it.checked = v}}
     var selected:Boolean
-        get() = (el as? HTMLSelectElement)?.let{it.selectedIndex != -1} ?: false
+        get() = (el as? HTMLOptionElement)?.let{it.selected} ?: false
         set(v){
-            if(!v) (el as? HTMLSelectElement)?.let{it.selectedIndex = -1}
+            if(!v) (el as? HTMLOptionElement)?.let{it.selected = v}
+        }
+    var selectedIndex:Int
+        get() = (el as? HTMLSelectElement)?.let{it.selectedIndex} ?: -1
+        set(v){
+            (el as? HTMLSelectElement)?.let{it.selectedIndex = v}
         }
     var style:String
         get() = el.style.cssText
