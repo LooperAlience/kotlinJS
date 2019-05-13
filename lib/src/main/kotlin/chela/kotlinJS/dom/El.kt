@@ -56,7 +56,8 @@ class El(val el:HTMLElement, val record:dynamic = null){
             "focus" to {self, el, _, v-> if(v == "true") el.focus()},
             "blur" to {self, el, _, _-> el.blur()},
             "checked" to {self, el, _, v->(el as? HTMLInputElement)?.let{it.checked = v == "true"}},
-            "selected" to {self, el, _, v->if(v == "false") (el as? HTMLSelectElement)?.let{it.selectedIndex = -1}},
+            "selected" to {self, el, _, v->(el as? HTMLOptionElement)?.let{it.selected = v == "true"}},
+            "selectedIndex" to {self, el, _, v->(el as? HTMLSelectElement)?.let{it.selectedIndex = v.toInt()}},
             "unselect" to {self, el, _, v->
                 if(v == "true"){
                     self["user-select"] = "none"
