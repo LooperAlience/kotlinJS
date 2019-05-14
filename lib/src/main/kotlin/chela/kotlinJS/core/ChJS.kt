@@ -1,6 +1,7 @@
 package chela.kotlinJS.core
 
 import kotlin.browser.document
+import kotlin.browser.window
 import kotlin.js.Promise
 
 
@@ -41,6 +42,8 @@ object ChJS {
     }
     val isFun = js("function(v){return typeof v == 'function';}")
     fun isFunction(v:dynamic) = isFun(v)
+    private val rMobile = """android|webos|iphone|ipad|ipod|blackberry|windows phone""".toRegex()
+    fun isMobile() = rMobile.containsMatchIn(window.navigator.userAgent.toLowerCase())
 }
 
 external fun delete(p: dynamic): Boolean = definedExternally

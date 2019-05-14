@@ -2,6 +2,7 @@ package chela.kotlinJS.dom
 
 import chela.kotlinJS.Ch
 import chela.kotlinJS.core.ChJS.isIn
+import chela.kotlinJS.core.ChJS.isMobile
 import chela.kotlinJS.core.delete
 import chela.kotlinJS.core.uuid
 import chela.kotlinJS.model.ChModel
@@ -26,8 +27,12 @@ class El(val el:HTMLElement, val record:dynamic = null){
         private val bodyStyle = document.body?.style
 
         private val prefix = "webkit,Moz,chrome,ms".split(',')
-        private val evKey = mutableMapOf<String, String?>()
         private val keys = mutableMapOf<String, String>()
+        private val evKey = mutableMapOf<String, String?>(
+                "down" to if(isMobile()) "touchstart" else "mousedown",
+                "up" to if(isMobile()) "touchend" else "mouseup",
+                "move" to if(isMobile()) "touchmove" else "mousemove"
+        )
 
         private val scroll = mutableListOf<(Double, Double)->Boolean>()
         private fun scrollAdd(f:(Double, Double)->Boolean){
