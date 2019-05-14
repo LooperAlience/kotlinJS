@@ -29,6 +29,7 @@ abstract class ChHistory(private val default:String){
     fun pop() = history._pop()
     fun isEmpty() = history.isEmpty()
     fun size() = history.size
+    fun get() = history.last().substring(1).split(":")[0]
     protected open fun same(){}
     protected open fun back(){}
     protected open fun inHistory(idx: Int, size: Int){}

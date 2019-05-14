@@ -114,6 +114,9 @@ class El(val el:HTMLElement, val record:dynamic = null){
                     if(!r) v()
                     r
                 }
+            },
+            "rectHeight" to {self, el, k, v->
+                el.style.height = "${window.innerHeight - el.getBoundingClientRect().top}px"
             }
         )
     }
