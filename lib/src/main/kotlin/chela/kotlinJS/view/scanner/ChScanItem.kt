@@ -61,7 +61,9 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
                     val model = it.asDynamic()
                     @Suppress("UnsafeCastFromDynamic")
                     ChJS.keys(model) {
-                        if (it[0] != '_') m[it] = if (it == "style") model[it] else "$key.$it}"
+                        if (it[0] != '_'){
+                            m[it] = if(it == "style") model[it] else "$key.$it}"
+                        }
                     }
                 }
                 if (m.isNotEmpty()) style(m)

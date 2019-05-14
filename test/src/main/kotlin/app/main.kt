@@ -3,6 +3,7 @@ package app
 import chela.kotlinJS.Ch
 import chela.kotlinJS.cdata.Cdata
 import chela.kotlinJS.cdata.ChCdata
+import chela.kotlinJS.core.ChJS.isMobile
 import chela.kotlinJS.core.ChJS.objForEach
 import chela.kotlinJS.model.Model
 import chela.kotlinJS.view.ChViewModel
@@ -12,10 +13,23 @@ object vm:Model(true){
     val a = "@{cdata.test}"
     val b = "@{cdata.test2}"
     val c = "@{cdata.test3}"
+    val d = object:ChViewModel(true){
+        val mousedown = Ch.domEvent{e, el->
+            val ev = Ch.event(e, el)
+            println("down")
+            ev.pos()?.let{
+                println("down ${it.localX}, ${it.localY}")
+            }
+
+        }
+        val html = "test"
+        val background = "#0ff"
+    }
 }
 
 @Suppress("MoveLambdaOutsideParentheses")
 fun main(args: Array<String>){
+    println("isMobile - ${isMobile()}")
     val v = vm
     Ch.sql.init("js/sql.js")
     .then{_:dynamic->Ch.resource.init()}
