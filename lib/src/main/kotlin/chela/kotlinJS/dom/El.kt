@@ -57,6 +57,7 @@ class El(val el:HTMLElement, val record:dynamic = null){
             "html" to {self, el, _, v-> el.innerHTML = v},
             "+html" to {self, el, _, v-> el.innerHTML = v + el.innerHTML},
             "html+" to {self, el, _, v-> el.innerHTML += v},
+            "name" to {self, el, _, v-> (el as? HTMLFormElement)?.let{it.name = v}},
             "submit" to {self, el, _, _->(el as? HTMLFormElement)?.let{it.submit()}},
             "focus" to {self, el, _, v-> if(v == "true") el.focus()},
             "blur" to {self, el, _, _-> el.blur()},
