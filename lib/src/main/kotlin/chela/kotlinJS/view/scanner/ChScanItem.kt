@@ -140,7 +140,7 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
             }
         }
         if(r.isNotEmpty()) r.forEach{(k, v)->
-            r[k] = if(v is String && v.indexOf(' ') == -1) reV.num(v)?.toFloat() ?: v
+            r[k] = if(v is String && v.indexOf(' ') == -1) reV.num(v) ?: v
             else v
         }
         return r
