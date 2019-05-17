@@ -4,6 +4,7 @@ import chela.kotlinJS.Ch
 import chela.kotlinJS.cdata.Cdata
 import chela.kotlinJS.cdata.ChCdata
 import chela.kotlinJS.core.ChJS.isMobile
+import chela.kotlinJS.core.ChJS.obj
 import chela.kotlinJS.core.ChJS.objForEach
 import chela.kotlinJS.model.Model
 import chela.kotlinJS.view.ChViewModel
@@ -25,6 +26,15 @@ object vm:Model(true){
         val html = "test"
         val background = "#0ff"
     }
+    val tmpl = Ch.templateData(arrayOf(obj{
+        html = "title2"
+        click = Ch.domEvent{e, el->
+            val ev = Ch.event(e, el)
+            println("a:${ev.ref?.get("a")} - b:${ev.ref?.get("b")}")
+        }
+    }), "a").ref(
+            "a" to 3, "b" to "abc"
+    )
 }
 
 @Suppress("MoveLambdaOutsideParentheses")

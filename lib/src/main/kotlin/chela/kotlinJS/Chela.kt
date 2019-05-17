@@ -70,8 +70,10 @@ object Ch{
         val index:Int get() = _data.index
         @Suppress("UnsafeCastFromDynamic")
         val length:Int get() = _data.length
+        @Suppress("UnsafeCastFromDynamic")
+        val ref:Map<String, dynamic>? get() = _data.ref
         fun render() = (_data.tmpl as? ChTemplate)?.let{
-            it.rerender(_data.view, index, length, data, false)
+            it.rerender(_data.view, index, length, data, false, ref)
         }
         var _pos:Pos? = null
         fun pos():Pos?{

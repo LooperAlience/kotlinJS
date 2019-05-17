@@ -3,7 +3,6 @@ package chela.kotlinJS.view.scanner.template
 import chela.kotlinJS.model.Model
 import chela.kotlinJS.view.scanner.ChScanner
 import org.w3c.dom.HTMLElement
-import kotlin.browser.document
 
 class ChTemplate(val el:HTMLElement):Model(){
     companion object{
@@ -15,7 +14,7 @@ class ChTemplate(val el:HTMLElement):Model(){
             tmpls[t.key] = t
 
         }
-        fun render(el:HTMLElement, data:Array<dynamic>?, tmpl:Array<out String>){
+        fun render(el: HTMLElement, data: Array<dynamic>?, tmpl: Array<out String>, ref: Map<String, dynamic>?){
             val templates = tmpl.map{tmpls[it] ?: throw Throwable("invalid tmpl $it")}
             val d = el.asDynamic()
             @Suppress("UnsafeCastFromDynamic")
@@ -25,10 +24,10 @@ class ChTemplate(val el:HTMLElement):Model(){
                 d.__chRd__ = prev
                 el.innerHTML = ""
             }
-            prev.render(el, data)
+            prev.render(el, data, ref)
         }
     }
-    private lateinit var key:String
+    private var key:String = ""
     private val scanned by lazy{ChScanner.scan(el)}
     override operator fun set(k:String, v:Any):Boolean{
         when(k){
@@ -38,15 +37,15 @@ class ChTemplate(val el:HTMLElement):Model(){
     }
     override fun viewmodel(k:String, v: List<String>) = true
     internal fun isNTH(i: Int, dSize: Int) = true
-    internal fun rerender(target: HTMLElement?, i: Int, dSize: Int, curr: dynamic, isSkip: Boolean) = if(isNTH(i, dSize)){
-        if (!isSkip) scanned.render(target, curr, i, dSize, this)
+    internal fun rerender(target: HTMLElement?, i: Int, dSize: Int, curr: dynamic, isSkip: Boolean,  r:Map<String, dynamic>?) = if(isNTH(i, dSize)){
+        if (!isSkip) scanned.render(target, curr, i, dSize, this, r)
         target?.nextElementSibling
     }else target
-    internal fun render(target: HTMLElement, i: Int, dSize: Int, curr: dynamic) = run {
-        if (isNTH(i, dSize)) {
+    internal fun render(target: HTMLElement, i: Int, dSize: Int, curr: dynamic,  r:Map<String, dynamic>?) = run {
+        if(isNTH(i, dSize)){
             val el = el.cloneNode(true)
             target.appendChild(el)
-            scanned.render(el as HTMLElement, curr, i, dSize, this)
+            scanned.render(el as HTMLElement, curr, i, dSize, this, r)
         }
     }
     internal fun drain(target:HTMLElement, i: Int, dSize: Int) = run{

@@ -10,7 +10,7 @@ class RenderData(private val tmpl: List<ChTemplate>) {
         }
         return true
     }
-    fun render(el: HTMLElement, data:Array<dynamic>?){
+    fun render(el: HTMLElement, data: Array<dynamic>?, r: Map<String, dynamic>?){
         if(data == null) return
         val oSize = old.size
         val dSize = data.size
@@ -23,7 +23,7 @@ class RenderData(private val tmpl: List<ChTemplate>) {
                 val v = JSON.stringify(curr)
                 val isSkip = v == old[i]
                 if(!isSkip) old[i] = v
-                tmpl.forEach {target = it.rerender(el, i, dSize, curr, isSkip)}
+                tmpl.forEach {target = it.rerender(el, i, dSize, curr, isSkip, r)}
             } ?: break
             i++
         }
@@ -31,7 +31,7 @@ class RenderData(private val tmpl: List<ChTemplate>) {
             val curr = data[i]
             @Suppress("UnsafeCastFromDynamic")
             old.add(JSON.stringify(curr))
-            tmpl.forEach {it.render(el, i, dSize, curr)}
+            tmpl.forEach {it.render(el, i, dSize, curr, r)}
             i++
         }
         while(i < oSize){

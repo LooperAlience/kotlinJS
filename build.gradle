@@ -1,4 +1,0 @@
-task copyLibMap(type: Copy) {
-    from "${projectDir}/lib/build/js/lib.js.map"
-    into "${projectDir}/app/build/kotlin-js-min/dev"
-}

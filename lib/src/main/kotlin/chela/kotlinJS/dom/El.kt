@@ -7,7 +7,6 @@ import chela.kotlinJS.core.delete
 import chela.kotlinJS.core.uuid
 import chela.kotlinJS.model.ChModel
 import chela.kotlinJS.regex.reStyle
-import chela.kotlinJS.throttleF
 import chela.kotlinJS.view.scanner.template.ChTemplate
 import chela.kotlinJS.view.scanner.template.TemplateData
 import org.w3c.dom.*
@@ -124,7 +123,7 @@ class El(val el:HTMLElement, val record:dynamic = null){
     operator fun set(k:String, _v:Any){
         if(_v == undefined) return
         if(k == "template"){
-            (_v as? TemplateData)?.let{ChTemplate.render(el, it.data, it.templates)}
+            (_v as? TemplateData)?.let{ChTemplate.render(el, it.data, it.templates, it.ref)}
             return
         }
         val v = if(_v == "null") null
