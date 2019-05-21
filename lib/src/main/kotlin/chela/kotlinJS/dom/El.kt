@@ -117,6 +117,12 @@ class El(val el:HTMLElement, val record:dynamic = null){
             },
             "rectHeight" to {self, el, k, v->
                 el.style.height = "${window.innerHeight - el.getBoundingClientRect().top}px"
+            },
+            "src" to {self, el, k, v->
+                el.setAttribute("src", v)
+            },
+            "backgroundImage" to {self, el, k, v->
+                el.style.backgroundImage = "url($v)"
             }
         )
     }

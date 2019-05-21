@@ -19,10 +19,10 @@ class ChTemplate(val el:HTMLElement):Model(){
             val templates = tmpl.map{tmpls[it] ?: throw Throwable("invalid tmpl $it")}
             val d = el.asDynamic()
             @Suppress("UnsafeCastFromDynamic")
-            var prev = d.__ch__ as? RenderData
+            var prev = d.__chRd__ as? RenderData
             if(prev == null || !prev.check(templates)){
                 prev = RenderData(templates)
-                d.__ch__ = prev
+                d.__chRd__ = prev
                 el.innerHTML = ""
             }
             prev.render(el, data)

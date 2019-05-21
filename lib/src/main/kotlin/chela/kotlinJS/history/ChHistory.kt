@@ -13,7 +13,9 @@ abstract class ChHistory(private val default:String){
             hash = if(v.isBlank() || hash == "#") default else v
             when{
                 history.isNotEmpty() && history.last() == hash->same()
-                history.size > 1 && history[history.size - 2] == hash->back()
+                history.size > 1 && history[history.size - 2] == hash->{
+                    back()
+                }
                 else->{
                     val idx = history.lastIndexOf(hash)
                     if(idx != -1) inHistory(idx, history.size)
