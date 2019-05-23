@@ -23,14 +23,14 @@ abstract class ChHttp{
 class ChFetch internal constructor(m:String, private var url:String): ChHttp(){
     private val init = obj{
         method = m
-        header = js("{}")
-        header["Cache-Control"] = "no-cache"
+        headers = js("{}")
+        headers["Cache-Control"] = "no-cache"
         body = null
     }
     private var form:MutableMap<String,String>? = null
     private var isLock = ""
     private var retry = 5
-    override fun header(key:String, value:String) = apply{init.header[key] = value}
+    override fun header(key:String, value:String) = apply{init.headers[key] = value}
     private fun _form(){
         if(isLock != "" || isLock != "form") throw Throwable("err")
         isLock = "form"
@@ -75,11 +75,11 @@ class ChFetch internal constructor(m:String, private var url:String): ChHttp(){
                     it.map { (k, v) -> ChJS.encodeURIComponent(k) + "=" + ChJS.encodeURIComponent(v) }.joinToString("&")
         }
         when{
-            init.method == "GET"->init.header["Content-Type"] = "text/plain; charset=utf-8"
+            init.method == "GET"->init.headers["Content-Type"] = "text/plain; charset=utf-8"
             form == null->when(isLock){
-                "json"->init.header["Content-Type"] = "application/json; charset=utf-8"
-                "body"->init.header["Content-Type"] = "application/text; charset=utf-8"
-                "blob"->init.header["Content-Type"] = "application/octet-stream; charset=utf-8"
+                "json"->init.headers["Content-Type"] = "application/json; charset=utf-8"
+                "body"->init.headers["Content-Type"] = "application/text; charset=utf-8"
+                "blob"->init.headers["Content-Type"] = "application/octet-stream; charset=utf-8"
             }
         }
         run(block)

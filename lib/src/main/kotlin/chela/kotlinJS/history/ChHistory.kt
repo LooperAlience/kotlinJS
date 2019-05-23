@@ -11,8 +11,9 @@ abstract class ChHistory(private val default:String){
         val f:()->Unit = {
             val v = ChJS.decodeURIComponent(window.location.hash)
             hash = if(v.isBlank() || hash == "#") default else v
+            println("$hash ${last()}")
             when{
-                history.isNotEmpty() && history.last() == hash->same()
+                history.isNotEmpty() && last() == hash->same()
                 history.size > 1 && history[history.size - 2] == hash->{
                     back()
                 }
@@ -31,7 +32,8 @@ abstract class ChHistory(private val default:String){
     fun pop() = history._pop()
     fun isEmpty() = history.isEmpty()
     fun size() = history.size
-    fun get() = history.last().substring(1).split(":")[0]
+    fun last() = if(!isEmpty()) history.last() else ""
+    fun get() = if(!isEmpty()) history.last()?.substring(1).split(":")[0] else ""
     protected open fun same(){}
     protected open fun back(){}
     protected open fun inHistory(idx: Int, size: Int){}
