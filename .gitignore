@@ -92,3 +92,9 @@ gradlew
 /test/build/tmp/jar/MANIFEST.MF
 /test/build/kotlin/compileKotlin2Js/caches-js/lookups/*.tab_i
 /test/build/kotlin/compileKotlin2Js/caches-js/lookups/*.len
+/app/bulid/dev/lib.js.map
+/test/build/kotlin-js-min/main/crypto.js
+/test/build/kotlin-js-min/main/lib.js.map
+/test/build/kotlin-js-min/main/sql.js
+/test/build/kotlin/compileKotlin2Js/caches-js/js/translation-result.tab.values
+/test/build/kotlin/compileKotlin2Js/caches-js/js/translation-result.tab.values.s
