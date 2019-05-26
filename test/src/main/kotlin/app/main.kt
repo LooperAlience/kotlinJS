@@ -7,6 +7,7 @@ import chela.kotlinJS.core.ChJS.isMobile
 import chela.kotlinJS.core.ChJS.obj
 import chela.kotlinJS.core.ChJS.objForEach
 import chela.kotlinJS.model.Model
+import chela.kotlinJS.sql.ChSql
 import chela.kotlinJS.view.ChViewModel
 import kotlin.browser.document
 
@@ -15,13 +16,31 @@ object vm:Model(true){
     val b = "@{cdata.test2}"
     val c = "@{cdata.test3}"
     val d = object:ChViewModel(true){
-        val mousedown = Ch.domEvent{e, el->
+        val down = Ch.domEvent{e, el->
             val ev = Ch.event(e, el)
             println("down")
             ev.pos()?.let{
                 println("down ${it.localX}, ${it.localY}")
             }
-
+            Ch.sql.db("test").then { db ->
+                db.query("insert1").then {
+                    db.query("select1")
+                }.then {
+                    it?.forEach {println(JSON.stringify(it))}
+                    db.query("update1")
+                }.then {
+                    println("select2")
+                    db.query("select1")
+                }.then{
+                    it?.forEach {println(JSON.stringify(it))}
+                }
+            }
+        }
+        val up = Ch.domEvent{e, el->
+            println("up")
+        }
+        val move = Ch.domEvent{e, el->
+            println("move")
         }
         val html = "test"
         val background = "#0ff"
@@ -31,6 +50,27 @@ object vm:Model(true){
         click = Ch.domEvent{e, el->
             val ev = Ch.event(e, el)
             println("a:${ev.ref?.get("a")} - b:${ev.ref?.get("b")}")
+            Ch.ruleset["string"]?.check("aaa")?.let{
+                if(it != Ch.INVALID){
+                    println("checked $it")
+                }
+            }
+            Ch.ruleset["email"]?.let{
+                it.check("aaa")?.let{
+                    if(it != Ch.INVALID){
+                        println("eamil checked $it")
+                    }else{
+                        println("eamil invalid")
+                    }
+                }
+                it.check("hika@gmail.com")?.let{
+                    if(it != Ch.INVALID){
+                        println("eamil checked $it")
+                    }else{
+                        println("eamil invalid")
+                    }
+                }
+            }
         }
     }), "a").ref(
             "a" to 3, "b" to "abc"
@@ -39,8 +79,13 @@ object vm:Model(true){
 
 @Suppress("MoveLambdaOutsideParentheses")
 fun main(args: Array<String>){
+
     println("isMobile - ${isMobile()}")
+
+
     val v = vm
+    Ch.ruleset.add("email", "string|email|minLength[4]|maxLength[255]")
+
     Ch.sql.init("js/sql.js")
     .then{_:dynamic->Ch.resource.init()}
     .then{
@@ -80,7 +125,19 @@ fun main(args: Array<String>){
                 }
             }
         }
+        Ch.sql.addQuery("select1", "select id, contents from ch_res where id = 'hika'")
+        Ch.sql.addQuery("insert1", "insert into ch_res(id, contents)values('hika', 'test')")
+        Ch.sql.addQuery("update1", "update ch_res set contents='test2' where id='hika'")
+        ChSql.addDb("test", """
+            create table if not exists ch_res(
+                res_rowid integer primary key autoincrement,
+                id varchar(255) not null,
+                contents text not null
+            )
+        """)
+
     }
+
     /*
     println(Chcrypto.generateRandomKey(32))
     println(Chcrypto.generateRandomKey(32))
@@ -114,7 +171,7 @@ fun main(args: Array<String>){
         }
     }
 
-    Ch.net.http("get", "test.json").send {
+    Ch.net.http("get", "testJSON.json").send {
         it.json?.then {
             println(JSON.stringify(it!!))
         }

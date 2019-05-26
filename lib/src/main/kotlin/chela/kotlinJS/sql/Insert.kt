@@ -43,7 +43,7 @@ internal class Insert(private val table:String):Query(){
             values = js("[]")
             values[0] = vo
         }
-        then(DataBase.connection.insert(o)){
+        then(db.connection.insert(o)){
             null
         }!!
     }

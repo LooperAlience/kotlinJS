@@ -1,5 +1,6 @@
 package chela.kotlinJS.validation
 
+import chela.kotlinJS.Ch
 import chela.kotlinJS.regex.reParam
 import chela.kotlinJS.validation.rule.BaseRules
 import chela.kotlinJS.validation.rule.RegRules
@@ -33,6 +34,6 @@ class ChRuleSet(rule:String){
                 r = it(r)
                 r !is ChRule
             }
-        }) r else this
+        }) r else Ch.INVALID
     }
 }

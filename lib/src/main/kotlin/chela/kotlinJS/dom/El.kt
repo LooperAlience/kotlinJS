@@ -27,10 +27,14 @@ class El(val el:HTMLElement, val record:dynamic = null){
 
         private val prefix = "webkit,Moz,chrome,ms".split(',')
         private val keys = mutableMapOf<String, String>()
-        private val evKey = mutableMapOf<String, String?>(
-                "down" to if(isMobile()) "touchstart" else "mousedown",
-                "up" to if(isMobile()) "touchend" else "mouseup",
-                "move" to if(isMobile()) "touchmove" else "mousemove"
+        private val evKey = if(isMobile()) mutableMapOf<String, String?>(
+            "down" to  "ontouchstart",
+            "up" to "ontouchend",
+            "move" to "ontouchmove"
+        ) else mutableMapOf<String, String?>(
+            "down" to "onmousedown",
+            "up" to "onmouseup",
+            "move" to "onmousemove"
         )
 
         private val scroll = mutableListOf<(Double, Double)->Boolean>()

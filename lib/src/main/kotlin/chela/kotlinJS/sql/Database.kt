@@ -5,8 +5,9 @@ import chela.kotlinJS.core.ChJS.then
 import kotlin.js.Promise
 
 class DataBase internal constructor(private val db:String, ver:Int, private val create: Array<out String>, private val upgrade:String = ""){
+    internal var connection:dynamic = js("new JsStore.Instance()")
     companion object {
-        internal var connection:dynamic = js("new JsStore.Instance()")
+
         private val rCreate = """^create +table(?: +if +not +exists)? +([a-zA-Z0-9_]+) *\(\s*((?:\s|\S)+)\)$""".toRegex()
         private var rColumn = """ *([a-zA-Z_]+) +([a-z0-9()]+)(?: +(?:(not null)|(primary key)|(autoincrement)|(unique)|(default += +[a-zA-Z0-9])))*""".toRegex()
         @Suppress("UnsafeCastFromDynamic")
@@ -54,7 +55,7 @@ class DataBase internal constructor(private val db:String, ver:Int, private val 
     }
     internal var isCreate = false
     internal fun connect() = Promise<DataBase>{res,_->
-        if(isCreate) then(connection.openDb(db)){res(this)}
+        if(isCreate) res(this) //then(connection.openDb(db)){res(this)}
         else then(connection.isDbExist(db)){
             if(it == true) then(connection.openDb(db)){
                 isCreate = true

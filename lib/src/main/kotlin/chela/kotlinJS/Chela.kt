@@ -27,9 +27,10 @@ import kotlin.js.Promise
 typealias throttleF = (Double, Array<out Any>)->Unit
 typealias debounceF = (Array<out Any>)->Unit
 object Ch{
+    enum class Values{INVALID, NONE}
     var debugLevel = 0
-    val NONE = object{}
-
+    val NONE = Values.NONE
+    val INVALID = Values.INVALID
     val ruleset = ChRuleSet
     val sql = ChSql
     val net = ChNet
@@ -110,7 +111,7 @@ object Ch{
                 }
                 i = t0.size
                 while(i-- > 0){
-                    if(!t1.contains(t0[i].identifier as String)) t0.removeAt(i)
+                    if(!t1.contains("${t0[0].identifier}")) t0.removeAt(i)
                     else{
                         val e = t0[i]
                         val X = e.pageX

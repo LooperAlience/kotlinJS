@@ -161,7 +161,7 @@ internal class Select: Query(){
             }
         }
         //println("select - ${JSON.stringify(r)}")
-        return ChJS.then(DataBase.connection.select(r)) {
+        return ChJS.then(db.connection.select(r)) {
             val r = it as Array<dynamic>
             fields?.let {f->
                 if(f[0] != "*") r.map{o->
