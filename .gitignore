@@ -98,3 +98,6 @@ gradlew
 /test/build/kotlin-js-min/main/sql.js
 /test/build/kotlin/compileKotlin2Js/caches-js/js/translation-result.tab.values
 /test/build/kotlin/compileKotlin2Js/caches-js/js/translation-result.tab.values.s
+/test/build/classes/kotlin/main/test.js.map
+/test/build/kotlin-js-min/main/test.js.map
+/test/build/resources/main/testJSON.json

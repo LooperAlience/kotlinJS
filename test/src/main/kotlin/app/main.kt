@@ -56,19 +56,17 @@ object vm:Model(true){
                 }
             }
             Ch.ruleset["email"]?.let{
-                it.check("aaa")?.let{
-                    if(it != Ch.INVALID){
-                        println("eamil checked $it")
-                    }else{
-                        println("eamil invalid")
-                    }
+                val a = it.check("aaa")
+                if(a != Ch.INVALID){
+                    println("eamil checked $a")
+                }else{
+                    println("eamil invalid")
                 }
-                it.check("hika@gmail.com")?.let{
-                    if(it != Ch.INVALID){
-                        println("eamil checked $it")
-                    }else{
-                        println("eamil invalid")
-                    }
+                val b = it.check("hika@gmail.com")
+                if(b != Ch.INVALID){
+                    println("eamil checked $b")
+                }else{
+                    println("eamil invalid")
                 }
             }
         }
@@ -135,7 +133,7 @@ fun main(args: Array<String>){
                 contents text not null
             )
         """)
-
+        Ch.ruleset.add("a", "......")
     }
 
     /*
