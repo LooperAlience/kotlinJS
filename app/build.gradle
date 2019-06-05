@@ -47,3 +47,16 @@ task packMain(type: Exec) {
             '--js=build/kotlin-js-min/main/app.js'
     ]
 }
+task copyBuildFolder{
+    doLast{
+        def f = "$buildDir/kotlin-js-min"
+        def t = "$buildDir/../../$buildCopyPath/src/main/resources/static"
+        println("\n 파일 복사 from=$f to=$t")
+        copy {
+            from(f){
+                exclude '**/*.php', '**/*.json', 'json', '**/_notes', 'dev.html', '_index.html'
+            }
+            into t
+        }
+    }
+}
