@@ -69,6 +69,15 @@ class El(val el:HTMLElement, val record:dynamic = null){
             "submit" to {self, el, _, _->(el as? HTMLFormElement)?.let{it.submit()}},
             "focus" to {self, el, _, v-> if(v == "true") el.focus()},
             "blur" to {self, el, _, _-> el.blur()},
+            "disabled" to {self, el, _, v->
+                val disabled = v == true || v == "true"
+                (el as? HTMLInputElement)?.let{it.disabled = disabled} ?:
+                (el as? HTMLButtonElement)?.let{it.disabled = disabled} ?:
+                (el as? HTMLSelectElement)?.let{it.disabled = disabled} ?:
+                (el as? HTMLOptGroupElement)?.let{it.disabled = disabled} ?:
+                (el as? HTMLOptionElement)?.let{it.disabled = disabled} ?:
+                (el as? HTMLTextAreaElement)?.let{it.disabled = disabled}
+            },
             "checked" to {self, el, _, v->(el as? HTMLInputElement)?.let{it.checked = v == "true"}},
             "selected" to {self, el, _, v->(el as? HTMLOptionElement)?.let{it.selected = v == "true"}},
             "selectedIndex" to {self, el, _, v->(el as? HTMLSelectElement)?.let{it.selectedIndex = v.toInt()}},
