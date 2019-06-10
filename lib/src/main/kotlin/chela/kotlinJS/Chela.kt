@@ -16,6 +16,7 @@ import chela.kotlinJS.view.router.holder.ChGroupBase
 import chela.kotlinJS.view.router.holder.ChHolderBase
 import chela.kotlinJS.view.scanner.ChScanner
 import chela.kotlinJS.view.scanner.template.ChTemplate
+import chela.kotlinJS.view.scanner.template.NTH
 import chela.kotlinJS.view.scanner.template.TemplateData
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Touch
@@ -206,6 +207,7 @@ object Ch{
         object ok:ApiResult("")
         class fail(msg:String):ApiResult(msg)
     }
+    fun nth(key:String, f:NTH){ChTemplate.nthF[key] = f}
     fun templateData(data:Array<dynamic>?, vararg template: String) = TemplateData(data, template)
     fun domEvent(block:domEvent):domEvent = block
     fun event(e: Event, el:HTMLElement) = ChEvent(e, el)
