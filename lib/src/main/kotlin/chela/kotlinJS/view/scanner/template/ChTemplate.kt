@@ -53,6 +53,7 @@ class ChTemplate(val el:HTMLElement):Model(){
     internal fun render(target: HTMLElement, i: Int, dSize: Int, curr: dynamic,  r:Map<String, dynamic>?) = run {
         if(nth(i, dSize)){
             val el = el.cloneNode(true)
+            (el as HTMLElement).removeAttribute("data-ch")
             target.appendChild(el)
             scanned.render(el as HTMLElement, curr, i, dSize, this, r)
         }

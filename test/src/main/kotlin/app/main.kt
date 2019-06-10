@@ -70,7 +70,8 @@ object vm:Model(true){
                 }
             }
         }
-    }), "a").ref(
+    },obj{html = "title3"},obj{html = "title4"}
+            ), "a", "b").ref(
             "a" to 3, "b" to "abc"
     )
 }
@@ -133,7 +134,6 @@ fun main(args: Array<String>){
                 contents text not null
             )
         """)
-        Ch.ruleset.add("a", "......")
     }
 
     /*

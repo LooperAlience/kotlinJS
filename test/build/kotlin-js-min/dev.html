@@ -14,7 +14,8 @@
 <div data-ch="html:@{vm.c}"></div>
 <div data-ch="@{vm.d}" style="width:500px;height:500px;background:#ff0"></div>
 <div data-ch="template:@{vm.tmpl}">
-    <div data-cht="key:`a`" data-ch="${}"  style="width:200px;height:200px;background:#f00"></div>
+    <div data-cht="key:`a`, nth:`even`" data-ch="${}"  style="width:200px;height:200px;background:#f00"></div>
+    <p data-cht="key:`b`m nth:`odd`" data-ch="${}"  style="width:200px;height:200px;background:#f00"></p>
 </div>
 <script src="main/kotlin.js"></script>
 <script src="main/lib.js"></script>
