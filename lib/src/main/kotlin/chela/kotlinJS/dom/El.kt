@@ -135,6 +135,13 @@ class El(val el:HTMLElement, val record:dynamic = null){
             },
             "backgroundImage" to {self, el, k, v->
                 el.style.backgroundImage = "url($v)"
+            },
+            "backgroundColor" to {self, el, k, v->
+                println("backgroundColor" + v)
+                el.style.backgroundColor = "$v"
+            },
+            "backgroundSize" to {self, el, k, v->
+                el.style.backgroundSize = "$v"
             }
         )
     }
