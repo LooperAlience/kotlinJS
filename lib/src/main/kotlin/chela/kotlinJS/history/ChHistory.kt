@@ -11,6 +11,7 @@ abstract class ChHistory(private val default:String){
         val f:()->Unit = {
             val v = ChJS.decodeURIComponent(window.location.hash)
             hash = if(v.isBlank() || hash == "#") default else v
+            println("hash$hash")
             when{
                 history.isNotEmpty() && last() == hash->same()
                 history.size > 1 && history[history.size - 2] == hash->{
@@ -32,6 +33,7 @@ abstract class ChHistory(private val default:String){
     fun isEmpty() = history.isEmpty()
     fun size() = history.size
     fun last() = if(!isEmpty()) history.last() else ""
+    fun lastprev() = history[history.size - 2]
     fun get() = if(!isEmpty()) history.last()?.substring(1).split(":")[0] else ""
     protected open fun same(){}
     protected open fun back(){}
