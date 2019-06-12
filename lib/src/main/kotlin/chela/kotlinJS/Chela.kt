@@ -5,7 +5,6 @@ import chela.kotlinJS.resource.ChRes
 import chela.kotlinJS.dom.domEvent
 import chela.kotlinJS.looper.ChLooper
 import chela.kotlinJS.model.ChModel
-import chela.kotlinJS.model.Model
 import chela.kotlinJS.net.ChNet
 import chela.kotlinJS.net.ChResponse
 import chela.kotlinJS.sql.ChSql
@@ -19,9 +18,7 @@ import chela.kotlinJS.view.scanner.template.ChTemplate
 import chela.kotlinJS.view.scanner.template.NTH
 import chela.kotlinJS.view.scanner.template.TemplateData
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.Touch
 import org.w3c.dom.events.Event
-import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.js.Promise
 
@@ -207,6 +204,22 @@ object Ch{
         object ok:ApiResult("")
         class fail(msg:String):ApiResult(msg)
     }
+    class Value(val kv:Array<out Pair<String, String>>, val block:(Map<String, Any>)->Any){
+        val map = mutableMapOf<String, Any>()
+    }
+    fun valueOf(vararg kv:Pair<String, String>, block:(Map<String, Any>)->Any) = Value(kv, block)
+    fun value(_v: Any, i: Int = 0, size: Int = 0, record: dynamic = null):Any{
+        var v = _v
+        while(v is String && v.isNotBlank()){
+            v = when(v[0]){
+                '@'->ChModel[v.substring(2, v.length - 1)]
+                '$'->if(record != null) ChModel.record(v.substring(2, v.length - 1).split("."), record, i, size)
+                else throw Throwable("record but no record $v")
+                else-> return v
+            }
+        }
+        return v
+    }
     fun nth(key:String, f:NTH){ChTemplate.nthF[key] = f}
     fun templateData(data:Array<dynamic>?, vararg template: String) = TemplateData(data, template)
     fun domEvent(block:domEvent):domEvent = block
@@ -214,18 +227,7 @@ object Ch{
     fun looper() = ChLooper()
     fun <T> router(base: ChHolderBase<T>) = ChRouter(base)
     fun router(el:HTMLElement) = ChRouter(ChGroupBase(el))
-    fun value(_v:Any, data: Model? = null):Any{
-        var v = _v
-        while(v is String && v.isNotBlank()){
-            v = when(v[0]){
-                '@'->ChModel.get(v.substring(2, v.length - 1))
-                '$'->if(data != null) ChModel.record(("_." + v.substring(2, v.length - 1)).split("."), data)
-                else throw Throwable("record but no data $v")
-                else-> return v
-            }
-        }
-        return v
-    }
+
     fun throttle(rate:Double, vararg arg:Any, block:throttleF):()->Unit{
         var timeOutId = -1
         var next = 0.0
@@ -271,4 +273,5 @@ object Ch{
             timeOutId = window.setTimeout(delay, rate.toInt())
         }
     }
+
 }

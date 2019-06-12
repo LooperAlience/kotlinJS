@@ -32,7 +32,9 @@ class ChTemplate(val el:HTMLElement):Model(){
             "even" to {i, _->i % 2 == 0},
             "odd" to {i, _->i % 2 == 1},
             "first" to {i, _->i == 0},
-            "last" to {i, j->i == j - 1}
+            "last" to {i, j->i == j - 1},
+            "inner" to {i, j->i != 0 && i != j - 1},
+            "outer" to {i, j->i == 0 || i == j - 1}
         )
     }
     private var key = ""
@@ -60,7 +62,7 @@ class ChTemplate(val el:HTMLElement):Model(){
     }
     internal fun drain(target:HTMLElement, i: Int, dSize: Int) = run{
         val r = target.nextElementSibling
-        target.parentNode?.removeChild(target)
+        if(nth(i, dSize)) target.parentNode?.removeChild(target)
         r
     }
 }

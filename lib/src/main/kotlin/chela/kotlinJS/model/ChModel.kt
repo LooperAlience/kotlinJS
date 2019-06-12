@@ -12,17 +12,24 @@ object ChModel{
             throw Exception("invalid key:" + v[0])
         }
     }
-    fun record(v: List<String>, record: dynamic): Any {
+    fun record(v: List<String>, record: dynamic, i: Int, size: Int): Any {
         if (v.isEmpty()) throw Exception("invalid list size == 0")
         if(v.size == 1 && v[0] == "") return record as Any
         var r = record
         v.all{
-            if(r[it] != undefined){
-                r = r[it]
-                true
-            }else{
-                r = null
-                false
+            when(it){
+                ":index"->{r = i; false}
+                ":size"->{r = size; false}
+                ":record"->{r = record; true}
+                else -> {
+                    if(r[it] != undefined) {
+                        r = r[it]
+                        true
+                    }else{
+                        r = null
+                        false
+                    }
+                }
             }
         }
         return r

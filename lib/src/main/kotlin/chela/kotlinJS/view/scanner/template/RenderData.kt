@@ -1,5 +1,6 @@
 package chela.kotlinJS.view.scanner.template
 
+import chela.kotlinJS.core.ChJS
 import org.w3c.dom.HTMLElement
 
 class RenderData(private val tmpl: List<ChTemplate>) {
@@ -20,7 +21,7 @@ class RenderData(private val tmpl: List<ChTemplate>) {
         while(i < j){
             (target as? HTMLElement)?.let { el->
                 val curr = data[i]
-                val v = JSON.stringify(curr)
+                val v = ChJS.stringify(curr)
                 val isSkip = v == old[i]
                 if(!isSkip) old[i] = v
                 tmpl.forEach {target = it.rerender(el, i, dSize, curr, isSkip, r)}
@@ -30,7 +31,7 @@ class RenderData(private val tmpl: List<ChTemplate>) {
         while(i < dSize){
             val curr = data[i]
             @Suppress("UnsafeCastFromDynamic")
-            old.add(JSON.stringify(curr))
+            old.add(ChJS.stringify(curr))
             tmpl.forEach {it.render(el, i, dSize, curr, r)}
             i++
         }

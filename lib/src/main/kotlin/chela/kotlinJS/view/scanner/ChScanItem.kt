@@ -84,7 +84,7 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
         record?.put(k, v)
         return true
     }
-    fun render(data:dynamic? = null):Map<String, Any>?{
+    fun render(record: dynamic = null, i: Int, size: Int):Map<String, Any>?{
         val r = mutableMapOf<String, Any>()
         if(!isOnce){
             isOnce = true
@@ -95,13 +95,13 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
         }
         prop?.let{
             it.forEach {(k, _v) ->
-                when(val v = Ch.value(ChModel[_v], data)){
+                when(val v = Ch.value(ChModel[_v], i, size)){
                     is Ch.Once->{
-                        r[k] = Ch.value(v.v)
+                        r[k] = Ch.value(v.v, i, size)
                         v.isRun = true
                         prop?.remove(k)
                     }
-                    is Ch.Update->r[k] = Ch.value(v.v)
+                    is Ch.Update->r[k] = Ch.value(v.v, i, size)
                     else->propVal?.let{
                         val pv = it[k]
                         if(pv == null || pv != v){
@@ -112,30 +112,27 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
                 }
             }
         }
-
-        template?.let{
-            r["template"] = it
-        }
-        record?.forEach {(k, _v)->
-            if(data == null) throw Throwable("no data for record")
-            val v = Ch.value(ChModel.record(_v, data))
+        template?.let{r["template"] = it}
+        this.record?.forEach { (k, _v)->
+            if(record == null) throw Throwable("no record for record")
+            val v = Ch.value(ChModel.record(_v, record, i, size), i, size)
             when{
                 k == "style" -> objForEach(v){k, v->
-                    when(val sv = Ch.value(v ?: Ch.NONE)){
+                    when(val sv = Ch.value(v ?: Ch.NONE, i, size)){
                         is Ch.Once -> if (!sv.isRun) {
-                            r[k] = Ch.value(sv.v)
+                            r[k] = Ch.value(sv.v, i, size)
                             sv.isRun = true
                         }
-                        is Ch.Update -> r[k] = Ch.value(sv.v)
+                        is Ch.Update -> r[k] = Ch.value(sv.v, i, size)
                         else -> r[k] = sv
                     }
                 }
                 v is Ch.Once -> {
-                    r[k] = Ch.value(v.v)
+                    r[k] = Ch.value(v.v, i, size)
                     v.isRun = true
-                    record?.remove(k)
+                    this.record?.remove(k)
                 }
-                v is Ch.Update -> r[k] = Ch.value(v.v)
+                v is Ch.Update -> r[k] = Ch.value(v.v, i, size)
                 else -> r[k] = v
             }
         }
