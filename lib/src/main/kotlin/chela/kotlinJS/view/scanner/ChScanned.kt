@@ -27,10 +27,10 @@ class ChScanned internal constructor(var view: HTMLElement, private val items:Mu
                 val el = El(vi)
                 it.forEach{(k, value)->
                     el[k] = if(value !is Ch.Value) value
-                        else value.block(value.kv.run {
-                            forEach { (k, mk) ->value.map[k] = Ch.value(mk, i, size, record)}
-                            value.map
-                        })
+                    else value.block(value.kv.run {
+                        forEach { (k, mk) ->value.map[k] = Ch.value(mk, i, size, record)}
+                        value.map
+                    })
                 }
             }
         }

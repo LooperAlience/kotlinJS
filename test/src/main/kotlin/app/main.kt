@@ -123,7 +123,7 @@ fun main(args: Array<String>){
                                 println("error - $it")
                             } ?: run{
                                 println("rerender")
-                                scanned.render()
+                               scanned.render()
                             }
                         }
                     }

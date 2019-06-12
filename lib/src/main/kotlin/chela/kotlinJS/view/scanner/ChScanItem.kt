@@ -104,7 +104,7 @@ class ChScanItem internal constructor(var view: HTMLElement, private val pos:Lis
                     is Ch.Update->r[k] = Ch.value(v.v, i, size)
                     else->propVal?.let{
                         val pv = it[k]
-                        if(pv == null || pv != v){
+                        if(pv == null || pv != v || v is Ch.Value){
                             r[k] = v
                             it[k] = v
                         }

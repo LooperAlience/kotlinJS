@@ -24,7 +24,7 @@ class RenderData(private val tmpl: List<ChTemplate>) {
                 val v = ChJS.stringify(curr)
                 val isSkip = v == old[i]
                 if(!isSkip) old[i] = v
-                tmpl.forEach {target = it.rerender(el, i, dSize, curr, isSkip, r)}
+                tmpl.forEach{target = it.rerender(target as? HTMLElement, i, dSize, curr, isSkip, r)}
             } ?: break
             i++
         }
