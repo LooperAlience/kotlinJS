@@ -46,7 +46,9 @@ object vm:Model(true){
         val background = "#0ff"
     }
     val tmpl = Ch.templateData(arrayOf(obj{
-        html = "title2"
+        html = Ch.valueOf("i" to "\${:index}", "j" to "\${:size}"){
+            "title2 ${it["i"]}, ${it["j"]}"
+        }
         click = Ch.domEvent{e, el->
             val ev = Ch.event(e, el)
             println("a:${ev.ref?.get("a")} - b:${ev.ref?.get("b")}")
@@ -70,7 +72,12 @@ object vm:Model(true){
                 }
             }
         }
-    }), "a").ref(
+    },obj{html = Ch.valueOf("i" to "\${:index}", "j" to "\${:size}"){
+        "title3 ${it["i"]}, ${it["j"]}"
+    }},obj{html = Ch.valueOf("i" to "\${:index}", "j" to "\${:size}"){
+        "title4 ${it["i"]}, ${it["j"]}"
+    }}
+            ), "a", "b").ref(
             "a" to 3, "b" to "abc"
     )
 }
@@ -116,7 +123,7 @@ fun main(args: Array<String>){
                                 println("error - $it")
                             } ?: run{
                                 println("rerender")
-                                scanned.render()
+                               scanned.render()
                             }
                         }
                     }
@@ -133,7 +140,6 @@ fun main(args: Array<String>){
                 contents text not null
             )
         """)
-        Ch.ruleset.add("a", "......")
     }
 
     /*

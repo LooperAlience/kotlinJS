@@ -40,10 +40,13 @@ object ChJS {
         script.addEventListener("load", res)
         document.head?.appendChild(script)
     }
+    val isObj = js("function(v){var a = typeof v; return a == 'function' || a == 'object'}")
     val isFun = js("function(v){return typeof v == 'function';}")
     fun isFunction(v:dynamic) = isFun(v)
     private val rMobile = """android|webos|iphone|ipad|ipod|blackberry|windows phone""".toRegex()
     fun isMobile() = rMobile.containsMatchIn(window.navigator.userAgent.toLowerCase())
+    var _stringify = js("function(o){var c=[];return JSON.stringify(o,function(k,v){if(v&&typeof v==='object'){if(c.indexOf(v)!==-1)return;c.push(v);}return v;});}")
+    fun stringify(o:dynamic):String = _stringify(o)
 }
 
 external fun delete(p: dynamic): Boolean = definedExternally

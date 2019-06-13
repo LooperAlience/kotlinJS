@@ -4,6 +4,7 @@ import chela.kotlinJS.model.Model
 import chela.kotlinJS.view.scanner.ChScanner
 import org.w3c.dom.HTMLElement
 
+typealias NTH = (Int, Int)->Boolean
 class ChTemplate(val el:HTMLElement):Model(){
     companion object{
         private val tmpls = mutableMapOf<String, ChTemplate>()
@@ -26,31 +27,43 @@ class ChTemplate(val el:HTMLElement):Model(){
             }
             prev.render(el, data, ref)
         }
+        val nthF = mutableMapOf<String, NTH>(
+            "all" to {_, _->true},
+            "even" to {i, _->i % 2 == 0},
+            "odd" to {i, _->i % 2 == 1},
+            "first" to {i, _->i == 0},
+            "last" to {i, j->i == j - 1},
+            "inner" to {i, j->i != 0 && i != j - 1},
+            "outer" to {i, j->i == 0 || i == j - 1}
+        )
     }
-    private var key:String = ""
+    private var key = ""
+    private var nth = nthF["all"] ?: throw Throwable("no all")
     private val scanned by lazy{ChScanner.scan(el)}
     override operator fun set(k:String, v:Any):Boolean{
         when(k){
             "key"->key = "$v"
+            "nth"->nth = nthF["$v"] ?: throw Throwable("invalid nth:$v")
         }
         return true
     }
     override fun viewmodel(k:String, v: List<String>) = true
-    internal fun isNTH(i: Int, dSize: Int) = true
-    internal fun rerender(target: HTMLElement?, i: Int, dSize: Int, curr: dynamic, isSkip: Boolean,  r:Map<String, dynamic>?) = if(isNTH(i, dSize)){
+    internal fun rerender(target: HTMLElement?, i: Int, dSize: Int, curr: dynamic, isSkip: Boolean,  r:Map<String, dynamic>?) = if(nth(i, dSize)){
         if (!isSkip) scanned.render(target, curr, i, dSize, this, r)
         target?.nextElementSibling
     }else target
     internal fun render(target: HTMLElement, i: Int, dSize: Int, curr: dynamic,  r:Map<String, dynamic>?) = run {
-        if(isNTH(i, dSize)){
+        //println("tmpl render $i, $dSize, $key, ${nth(i, dSize)}")
+        if(nth(i, dSize)){
             val el = el.cloneNode(true)
+            (el as HTMLElement).removeAttribute("data-ch")
             target.appendChild(el)
             scanned.render(el as HTMLElement, curr, i, dSize, this, r)
         }
     }
     internal fun drain(target:HTMLElement, i: Int, dSize: Int) = run{
         val r = target.nextElementSibling
-        target.parentNode?.removeChild(target)
+        if(nth(i, dSize)) target.parentNode?.removeChild(target)
         r
     }
 }

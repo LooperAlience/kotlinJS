@@ -101,3 +101,4 @@ gradlew
 /test/build/classes/kotlin/main/test.js.map
 /test/build/kotlin-js-min/main/test.js.map
 /test/build/resources/main/testJSON.json
+*.salive
