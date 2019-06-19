@@ -30,6 +30,7 @@ object BaseRules: ChRule(){
             val r = ChRule["In"](arg)(v)
             if(r == v) this else v
         }}}
+        ChRule["NotBlank"] = { arg->{v-> if(v is String && v.isNotBlank()) v else this }}
     }
 
 
