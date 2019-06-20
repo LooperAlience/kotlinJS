@@ -12,6 +12,7 @@ abstract class ChHolderBase<T>{
     internal fun _pop(holder: ChHolder<T>, isJump:Boolean){
         _pause(holder, isJump)
         val delay = holder.pop(isJump)
+        popBefore(holder)
         if(delay == 0) pop(holder)
         else window.setTimeout({pop(holder)}, delay)
     }
@@ -28,6 +29,7 @@ abstract class ChHolderBase<T>{
         holder.take()
     }
     protected open fun push(holder: ChHolder<T>){}
+    open fun popBefore(holder: ChHolder<T>){}
     open fun pop(holder: ChHolder<T>){}
     protected open fun pause(holder: ChHolder<T>){}
     protected open fun resume(holder: ChHolder<T>){}

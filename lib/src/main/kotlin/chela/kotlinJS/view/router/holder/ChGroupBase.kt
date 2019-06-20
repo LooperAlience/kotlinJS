@@ -1,6 +1,8 @@
 package chela.kotlinJS.view.router.holder
 
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
+import kotlin.browser.window
 
 class ChGroupBase(group:HTMLElement): ChHolderBase<HTMLElement>(){
     private var group:HTMLElement = group
@@ -11,11 +13,16 @@ class ChGroupBase(group:HTMLElement): ChHolderBase<HTMLElement>(){
         group.innerHTML = ""
     }
     override fun push(holder: ChHolder<HTMLElement>){
-        group.appendChild(holder.create(this))
+        val v= holder.create(this)
+        group.appendChild(v)
         group.style.display = display
     }
+    var removeTarget: Element? = null
+    override fun popBefore(holder: ChHolder<HTMLElement>) {
+        removeTarget = group.lastElementChild
+    }
     override fun pop(holder: ChHolder<HTMLElement>){
-        group.lastElementChild?.let{
+        removeTarget?.let{
             group.removeChild(it)
             if(group.childElementCount == 0) group.style.display = "none"
         }
