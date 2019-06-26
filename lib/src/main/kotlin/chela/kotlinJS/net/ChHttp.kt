@@ -17,6 +17,7 @@ abstract class ChHttp{
     abstract fun json(json:String): ChHttp
     abstract fun body(body:String): ChHttp
     abstract fun blobBody(body:dynamic): ChHttp
+    abstract fun timeout(ms:Int): ChHttp
     abstract fun file(key: String, filename: String, mine: String, file: dynamic): ChHttp
     abstract fun send(block: httpCallBack)
 }
@@ -30,6 +31,7 @@ class ChFetch internal constructor(m:String, private var url:String): ChHttp(){
     private var form:MutableMap<String,String>? = null
     private var isLock = ""
     private var retry = 5
+    private var timeout = 5000
     override fun header(key:String, value:String) = apply{init.headers[key] = value}
     private fun _form(){
         if(isLock != "" || isLock != "form") throw Throwable("err")
@@ -55,6 +57,9 @@ class ChFetch internal constructor(m:String, private var url:String): ChHttp(){
         if(isLock != "") throw Throwable("err")
         isLock = "json"
         init.body = json
+    }
+    override fun timeout(ms: Int) = apply {
+        timeout = ms
     }
     override fun body(body:String) = apply{
         if(isLock != "") throw Throwable("err")
@@ -89,7 +94,7 @@ class ChFetch internal constructor(m:String, private var url:String): ChHttp(){
         Promise.race(arrayOf(
                 window.fetch(Request(url, init)),
                 Promise { _, r ->
-                    id = window.setTimeout({ r(Throwable("timeout")) }, 5000)
+                    id = window.setTimeout({ r(Throwable("timeout")) }, timeout)
                 }
         )).then {
             window.clearTimeout(id)
