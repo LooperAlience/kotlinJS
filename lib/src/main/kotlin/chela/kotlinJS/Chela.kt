@@ -202,7 +202,11 @@ object Ch{
     sealed class ApiResult(val msg:String){
         fun isFail() = this is fail
         object ok:ApiResult("")
-        class fail(msg:String):ApiResult(msg)
+        class fail(msg:String):ApiResult(msg){
+            init {
+                console.log("ApiResult.fail $msg")
+            }
+        }
     }
     class Value(val kv:Array<out Pair<String, String>>, val block:(Map<String, Any>)->Any){
         val map = mutableMapOf<String, Any>()
