@@ -25,12 +25,10 @@ object ChCdata{
     private val rex = """\{|\}| """.toRegex()
     @Suppress("UnsafeCastFromDynamic")
     val requestKey:Promise<String?> get() = if(req.isEmpty()) Promise.resolve<String?>(null) else Promise{res, _ ->
-        println("Bbbbb")
         ChSql.db("ch").then {db->
-            println("aaaa")
             val r = req.map{(k, v) ->
                 db.query("getCdata", "id" to "$k=${"$v".replace(rex, "")}").then { arr ->
-                    println("arr ${JSON.stringify(arr)}")
+                    //println("arr ${JSON.stringify(arr)}")
                     arr?.let {
                         _try { JSON.parse<dynamic>(it[0][0]) }?.let { json ->
                             objForEach(json) { k, v ->

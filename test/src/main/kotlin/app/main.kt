@@ -115,7 +115,7 @@ fun main(args: Array<String>){
         scanned.render()
         Ch.cdata.requestKey.then {
             it?.let { k ->
-                println(k)
+                println("-------------------------------$k")
                 Ch.net.http("get", "json/cdata.json").send {
                     it.body?.then {
                         Ch.cdata.save(k, it).then{
