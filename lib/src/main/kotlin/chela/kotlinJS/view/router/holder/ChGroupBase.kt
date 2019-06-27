@@ -2,7 +2,6 @@ package chela.kotlinJS.view.router.holder
 
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
-import kotlin.browser.window
 
 class ChGroupBase(group:HTMLElement): ChHolderBase<HTMLElement>(){
     private var group:HTMLElement = group
@@ -23,7 +22,15 @@ class ChGroupBase(group:HTMLElement): ChHolderBase<HTMLElement>(){
     }
     override fun pop(holder: ChHolder<HTMLElement>){
         removeTarget?.let{
-            group.removeChild(it)
+            it.parentNode?.let{p->
+                if(group == p){
+                    console.log("removeChild 성공")
+                    p.removeChild(it)
+                }else{
+                    console.log("removeChild 실패")
+                }
+            }
+            //group.removeChild(it)
             if(group.childElementCount == 0) group.style.display = "none"
         }
     }
