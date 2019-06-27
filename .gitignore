@@ -102,3 +102,5 @@ gradlew
 /test/build/kotlin-js-min/main/test.js.map
 /test/build/resources/main/testJSON.json
 *.salive
+/test/build/kotlin-js-min/main/kotlinx-coroutines-core.js
+/test/build/kotlin-js-min/main/kotlinx-coroutines-core.js.map
