@@ -173,6 +173,22 @@ object Ch{
         protected abstract fun data(v:dynamic)
         protected open fun renew(v:dynamic) = ChRes.res(v)
         protected open fun error(){}
+        fun reload(database:DataBase? = null){
+            val f:(DataBase)->Unit = { db ->
+                net()
+                    .then{res -> setDB(db, res)}
+                    .then{it:dynamic ->
+                        if(it) getDB(db).then { v: dynamic ->
+                            if (isValid(v)) {
+                                renew(v)
+                                data[key] = v
+                                data(v)
+                            } else error()
+                        } else error()
+                    }
+            }
+            database?.let{f(it)} ?: ChSql.db(db).then(f)
+        }
         operator fun invoke(retry:Int = 3, database:DataBase? = null){
             if(retry == 0){
                 error()
@@ -202,7 +218,11 @@ object Ch{
     sealed class ApiResult(val msg:String){
         fun isFail() = this is fail
         object ok:ApiResult("")
-        class fail(msg:String):ApiResult(msg)
+        class fail(msg:String):ApiResult(msg){
+            init {
+                console.log("ApiResult.fail $msg")
+            }
+        }
     }
     class Value(val kv:Array<out Pair<String, String>>, val block:(Map<String, Any>)->Any){
         val map = mutableMapOf<String, Any>()
