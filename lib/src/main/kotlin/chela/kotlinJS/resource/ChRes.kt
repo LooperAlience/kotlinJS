@@ -5,6 +5,7 @@ import chela.kotlinJS.cdata.ChCdata
 import chela.kotlinJS.core.ChJS
 import chela.kotlinJS.core.ChJS.keys
 import chela.kotlinJS.sql.ChSql
+import chela.kotlinJS.validation.ChRuleSet
 import kotlin.js.Promise
 
 object ChRes{
@@ -23,6 +24,7 @@ object ChRes{
                 else Cdata(k, v)
             }
         }
+        if(v.ruleset != null) ChJS.objForEach(v.ruleset){k, v->ChRuleSet.add(k, v)}
     }
     fun load(v:dynamic) = Promise<dynamic>{ r, _->
         ChSql.db("ch").then {db->
