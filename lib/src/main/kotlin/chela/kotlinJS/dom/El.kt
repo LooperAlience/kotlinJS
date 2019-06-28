@@ -67,8 +67,8 @@ class El(val el:HTMLElement, val record:dynamic = null){
                 }
             },
             "submit" to {self, el, _, _->(el as? HTMLFormElement)?.let{it.submit()}},
-            "focus" to {self, el, _, v-> if(v == "true") el.focus()},
-            "blur" to {self, el, _, _-> el.blur()},
+            "focus_" to {self, el, _, v-> if(v == "true") el.focus()},
+            "blur_" to {self, el, _, _-> el.blur()},
             "disabled" to {self, el, _, v->
                 val disabled = v == true || v == "true"
                 (el as? HTMLInputElement)?.let{it.disabled = disabled} ?:
