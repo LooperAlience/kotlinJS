@@ -87,7 +87,6 @@ fun main(args: Array<String>){
 
     println("isMobile - ${isMobile()}")
 
-
     val v = vm
     Ch.ruleset.add("email", "string|email|minLength[4]|maxLength[255]")
 

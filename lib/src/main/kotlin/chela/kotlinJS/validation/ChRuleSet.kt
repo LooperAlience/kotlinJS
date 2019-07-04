@@ -21,15 +21,33 @@ class ChRuleSet(rule:String){
         fun check(k:String, v:Any) = (get(k) ?: string).check(v)
         fun isOk(vararg kv:Pair<String, Any>) = kv.all {(k, v)-> check(k, v) !is ChRuleSet }
     }
+    var msgKey = mutableMapOf<F, String>()
     private val rules = rule.split("-or-").map{
         it.split("|").filter{it.isNotBlank()}.map{v->
             val (k, arg) = reParam.parse(v)
-            ChRule[k](arg)
+            if(k.contains('@')){
+                val ks = k.split('@')
+                val r = ChRule[ks[1]](arg)
+                msgKey[r] = ks[0]
+                r
+            }else ChRule[k](arg)
         }
+    }
+    fun checkVali(v: Any):Pair<Boolean, Any>{
+        var r = v
+        var key = "@default"
+        return if(rules.any{
+            it.all{
+                msgKey[it]?.let{key = it}
+                r = it(r)
+                r !is ChRule
+            }
+        }) true to r else false to key
     }
     fun check(v: Any):Any{
         var r = v
         return if(rules.any{
+            r = v
             it.all{
                 r = it(r)
                 r !is ChRule

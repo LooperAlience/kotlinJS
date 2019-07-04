@@ -232,6 +232,49 @@ object Ch{
     fun <T> router(base: ChHolderBase<T>) = ChRouter(base)
     fun router(el:HTMLElement) = ChRouter(ChGroupBase(el))
 
+    class ChannelEvent(val channel: String, private val v:Any?){
+        internal var isStop = false
+        internal var isRemove = false
+        @Suppress("UNCHECKED_CAST")
+        fun <T>value():T? = v as? T
+        fun stop(){isStop = true}
+        fun remove(){isRemove = true}
+    }
+    private val channels = mutableMapOf<String, MutableSet<(ChannelEvent)->Unit>>()
+    fun addListener(channel:String, listener:(ChannelEvent)->Unit){
+        if(channels[channel] == null) channels[channel] = mutableSetOf()
+        channels[channel]?.let{it += listener}
+    }
+    fun addListenerOnce(channel:String, listener:(ChannelEvent)->Unit){
+        if(channels[channel] == null) channels[channel] = mutableSetOf()
+        channels[channel]?.let{ch->
+            ch += {
+                ch -= listener
+                listener(it)
+            }
+        }
+    }
+    fun addListener(channel:String, remover:(ChannelEvent)->Boolean, listener:(ChannelEvent)->Unit){
+        if(channels[channel] == null) channels[channel] = mutableSetOf()
+        channels[channel]?.let{ch->
+            ch += {if(remover(it)) ch -= listener else listener(it)}
+        }
+    }
+    fun removeListener(channel: String, listener:(ChannelEvent) -> Unit) = channels[channel]?.let{it -= listener}
+    fun notify(channel: String, value:Any? = null) = channels[channel]?.let{c->
+        val e = ChannelEvent(channel, value)
+        c.all{
+            if(!e.isStop) false
+            else{
+                it(e)
+                if(e.isRemove){
+                    c-= it
+                    e.isRemove = false
+                }
+                true
+            }
+        }
+    }
     fun throttle(rate:Double, vararg arg:Any, block:throttleF):()->Unit{
         var timeOutId = -1
         var next = 0.0

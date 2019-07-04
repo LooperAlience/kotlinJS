@@ -6,6 +6,7 @@ import chela.kotlinJS.core.ChJS
 import chela.kotlinJS.core.ChJS.keys
 import chela.kotlinJS.sql.ChSql
 import chela.kotlinJS.validation.ChRuleSet
+import chela.kotlinJS.validation.ChValidation
 import kotlin.js.Promise
 
 object ChRes{
@@ -15,6 +16,7 @@ object ChRes{
             val base = if(v.api.base != undefined) v.api.base else ""
             ChJS.objForEach(v.api) {k, v->Api(v, base).set(k)}
         }
+        if(v.ruleset != null) ChJS.objForEach(v.ruleset){k, v->ChRuleSet.add(k, v)}
         if(v.query != null) ChJS.objForEach(v.query){k, v->ChSql.addQuery(k,"${if (v is String) v else v.join(" ")}")}
         if(v.db != null) ChJS.objForEach(v.db){k, v->Db(v).set(k)}
         if(v.cdata != null){
@@ -24,7 +26,10 @@ object ChRes{
                 else Cdata(k, v)
             }
         }
-        if(v.ruleset != null) ChJS.objForEach(v.ruleset){k, v->ChRuleSet.add(k, v)}
+        if(v.validation != null) ChJS.objForEach(v.validation){k, v->
+            if(k == "@default") ChValidation.defaultMsg(v) else ChValidation[k] = v
+        }
+
     }
     fun load(v:dynamic) = Promise<dynamic>{ r, _->
         ChSql.db("ch").then {db->

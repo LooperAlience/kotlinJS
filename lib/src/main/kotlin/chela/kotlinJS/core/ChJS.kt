@@ -8,10 +8,8 @@ import kotlin.js.Promise
 object ChJS {
     val obj = js("Object")
     inline fun keys(v:dynamic, block:(String)->Unit) = obj.keys(v).unsafeCast<Array<String>>().forEach(block)
-    inline fun <T> obj2map(v:dynamic, block:(String, dynamic)->T) = run {
-        val r = mutableMapOf<String, T>()
-        obj.keys(v).unsafeCast<Array<String>>().forEach{r[it] = block(it, v[it])}
-        r
+    inline fun <T> obj2map(v:dynamic, block:(String, dynamic)->T = {_,v->v}) = mutableMapOf<String, T>().apply {
+        if(v != undefined) obj.keys(v).unsafeCast<Array<String>>().forEach{this[it] = block(it, v[it])}
     }
     inline fun objForEach(v:dynamic, block:(String, dynamic)->Unit){
         obj.keys(v).unsafeCast<Array<String>>().forEach{block(it, v[it])}
@@ -25,6 +23,7 @@ object ChJS {
         block(target)
         return target
     }
+    fun <T> hasOwnKey(target:dynamic, key:String):T? = if(target.hasOwnProperty(key)) target[key] as? T else null
     fun <R> then(p:dynamic, block:(dynamic)->R) = (p as? Promise<dynamic>)?.then(block)
     val enc = js("encodeURIComponent")
     @Suppress("UnsafeCastFromDynamic")
@@ -48,5 +47,4 @@ object ChJS {
     var _stringify = js("function(o){var c=[];return JSON.stringify(o,function(k,v){if(v&&typeof v==='object'){if(c.indexOf(v)!==-1)return;c.push(v);}return v;});}")
     fun stringify(o:dynamic):String = _stringify(o)
 }
-
 external fun delete(p: dynamic): Boolean = definedExternally
