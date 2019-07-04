@@ -1,16 +1,13 @@
 package chela.kotlinJS.view.router.holder
 
-import chela.kotlinJS.view.router.ChRouter
 import kotlin.browser.window
 
 abstract class ChHolderBase<T>{
     internal fun _push(holder: ChHolder<T>, isRestore:Boolean){
         push(holder)
         holder.push(isRestore)
-        _resume(holder, isRestore)
     }
     internal fun _pop(holder: ChHolder<T>, isJump:Boolean){
-        _pause(holder, isJump)
         val delay = holder.pop(isJump)
         popBefore(holder)
         if(delay == 0) pop(holder)

@@ -55,21 +55,21 @@ class El(val el:HTMLElement, val record:dynamic = null){
 
         @Suppress("UnsafeCastFromDynamic")
         private val prop = mutableMapOf<String, (El, HTMLElement, String, dynamic)->Unit>(
-            "className" to {_, el, _, v-> el.className = v},
-            "+className" to {_, el, _, v-> el.className = v + " " + el.className},
-            "html" to {_, el, _, v-> el.innerHTML = v},
-            "+html" to {_, el, _, v-> el.innerHTML = v + el.innerHTML},
-            "html+" to {_, el, _, v-> el.innerHTML += v},
-            "name" to {_, el, _, v->
+            "className" to {self, el, _, v-> el.className = v},
+            "+className" to {self, el, _, v-> el.className = v + " " + el.className},
+            "html" to {self, el, _, v-> el.innerHTML = v},
+            "+html" to {self, el, _, v-> el.innerHTML = v + el.innerHTML},
+            "html+" to {self, el, _, v-> el.innerHTML += v},
+            "name" to {self, el, _, v->
                 when(el){
                     is HTMLFormElement -> el.name = v
                     is HTMLInputElement -> el.name = v
                 }
             },
-            "submit" to {_, el, _, _->(el as? HTMLFormElement)?.let{it.submit()}},
-            "focus" to {_, el, _, v-> if(v == "true") el.focus()},
-            "blur" to {_, el, _, _-> el.blur()},
-            "disabled" to {_, el, _, v->
+            "submit" to {self, el, _, _->(el as? HTMLFormElement)?.let{it.submit()}},
+            "focus_" to {self, el, _, v-> if(v == "true") el.focus()},
+            "blur_" to {self, el, _, _-> el.blur()},
+            "disabled" to {self, el, _, v->
                 val disabled = v == true || v == "true"
                 (el as? HTMLInputElement)?.let{it.disabled = disabled} ?:
                 (el as? HTMLButtonElement)?.let{it.disabled = disabled} ?:
@@ -78,9 +78,9 @@ class El(val el:HTMLElement, val record:dynamic = null){
                 (el as? HTMLOptionElement)?.let{it.disabled = disabled} ?:
                 (el as? HTMLTextAreaElement)?.let{it.disabled = disabled}
             },
-            "checked" to {_, el, _, v->(el as? HTMLInputElement)?.let{it.checked = v == "true"}},
-            "selected" to {_, el, _, v->(el as? HTMLOptionElement)?.let{it.selected = v == "true"}},
-            "selectedIndex" to {_, el, _, v->(el as? HTMLSelectElement)?.let{it.selectedIndex = v.toInt()}},
+            "checked" to {self, el, _, v->(el as? HTMLInputElement)?.let{it.checked = v == "true"}},
+            "selected" to {self, el, _, v->(el as? HTMLOptionElement)?.let{it.selected = v == "true"}},
+            "selectedIndex" to {self, el, _, v->(el as? HTMLSelectElement)?.let{it.selectedIndex = v.toInt()}},
             "unselect" to {self, el, _, v->
                 if(v == "true"){
                     self["user-select"] = "none"
@@ -94,7 +94,7 @@ class El(val el:HTMLElement, val record:dynamic = null){
                     el.removeAttribute("onselectstart")
                 }
             },
-            "value" to {_, el, _, v->
+            "value" to {self, el, _, v->
                 if(v != null){
                     el.setAttribute("value", v)
                     (el as? HTMLSelectElement)?.let{it.value = v } ?:
@@ -105,7 +105,7 @@ class El(val el:HTMLElement, val record:dynamic = null){
                     (el as? HTMLInputElement)?.let{it.value = ""}
                 }
             },
-            "A" to {_, el, k, v-> el.setAttribute(k, v)},
+            "A" to {self, el, k, v-> el.setAttribute(k, v)},
             "lazySrc" to {self, el, k, v->
                 val src = v.split(" ")
                 if(window.innerHeight + 100 > el.getBoundingClientRect().top){
@@ -119,7 +119,7 @@ class El(val el:HTMLElement, val record:dynamic = null){
                     }
                 }
             },
-            "topViewPort" to {_, el, k, v->
+            "topViewPort" to {self, el, k, v->
                 if(window.innerHeight > el.getBoundingClientRect().top) v()
                 else scrollAdd{ x, y ->
                     val r = window.innerHeight < el.getBoundingClientRect().top
@@ -127,10 +127,10 @@ class El(val el:HTMLElement, val record:dynamic = null){
                     r
                 }
             },
-            "rectHeight" to {_, el, k, v->
+            "rectHeight" to {self, el, k, v->
                 el.style.height = "${window.innerHeight - el.getBoundingClientRect().top}px"
             },
-            "src" to {_, el, k, v->
+            "src" to {self, el, k, v->
                 el.setAttribute("src", v)
             }
         )
