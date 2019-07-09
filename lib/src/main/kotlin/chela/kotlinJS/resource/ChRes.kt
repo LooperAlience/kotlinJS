@@ -7,7 +7,6 @@ import chela.kotlinJS.core.ChJS.keys
 import chela.kotlinJS.sql.ChSql
 import chela.kotlinJS.validation.ChRuleSet
 import chela.kotlinJS.validation.ChValidation
-import kotlin.browser.window
 import kotlin.js.Promise
 
 object ChRes{
@@ -70,7 +69,7 @@ object ChRes{
                 else r(0)
             }
         }.catch{
-            if(base != null) res(base)
+            if(base != null) keys(base){ k -> res(base[k]) }
             r(0)
         }
     }
