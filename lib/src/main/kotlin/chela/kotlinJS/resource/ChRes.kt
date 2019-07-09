@@ -29,7 +29,6 @@ object ChRes{
         if(v.validation != null) ChJS.objForEach(v.validation){k, v->
             if(k == "@default") ChValidation.defaultMsg(v) else ChValidation[k] = v
         }
-
     }
     fun load(v:dynamic) = Promise<dynamic>{ r, _->
         ChSql.db("ch").then {db->
@@ -46,7 +45,7 @@ object ChRes{
             r(0)
         }
     }
-    fun init(base:dynamic = null) = Promise<dynamic>{res, _->
+    fun init(base:dynamic = null) = Promise<dynamic>{r, _->
         inited = true
         ChSql.addDb("ch", """
             create table if not exists ch_res(
@@ -55,20 +54,23 @@ object ChRes{
                 contents text not null
             )
         """)
-        ChSql.addQuery("getRes", "select id, contents from ch_res")
-        ChSql.addQuery("isRes", "select id from ch_res where id=@id@")
-        ChSql.addQuery("addRes", "insert into ch_res(id, contents)values(@id@, @contents@)")
-        ChSql.addQuery("getCdata", "select contents from ch_res where id like '%@id@%' order by res_rowid desc limit 1")
-        ChSql.addQuery("removeRes", "delete from ch_res where id=@id@")
         ChSql.db("ch").then{
+            ChSql.addQuery("getRes", "select id, contents from ch_res")
+            ChSql.addQuery("isRes", "select id from ch_res where id=@id@")
+            ChSql.addQuery("addRes", "insert into ch_res(id, contents)values(@id@, @contents@)")
+            ChSql.addQuery("getCdata", "select contents from ch_res where id like '%@id@%' order by res_rowid desc limit 1")
+            ChSql.addQuery("removeRes", "delete from ch_res where id=@id@")
             it.query("getRes").then{
                 if(!it.isNullOrEmpty()){
                     val r = js("{}")
                     it.forEach{r[it.id] = JSON.parse(it.contents)}
-                    load(r).then{v:Int->res(0)}
-                }else if(base != null) load(base).then{v:Int->res(0)}
-                else res(0)
+                    load(r).then{v:Int->r(0)}
+                }else if(base != null) load(base).then{v:Int->r(0)}
+                else r(0)
             }
+        }.catch{
+            if(base != null) res(base)
+            r(0)
         }
     }
 }

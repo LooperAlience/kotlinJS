@@ -24,6 +24,7 @@ object ChJS {
         return target
     }
     fun <T> hasOwnKey(target:dynamic, key:String):T? = if(target.hasOwnProperty(key)) target[key] as? T else null
+    fun <R> then(p:dynamic, reject:(dynamic)->R, resolve:(dynamic)->R) = (p as? Promise<dynamic>)?.catch(reject)?.then(resolve)
     fun <R> then(p:dynamic, block:(dynamic)->R) = (p as? Promise<dynamic>)?.then(block)
     val enc = js("encodeURIComponent")
     @Suppress("UnsafeCastFromDynamic")

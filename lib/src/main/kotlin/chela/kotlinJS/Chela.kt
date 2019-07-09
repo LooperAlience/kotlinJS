@@ -187,7 +187,16 @@ object Ch{
                         } else error()
                     }
             }
-            database?.let{f(it)} ?: ChSql.db(db).then(f)
+            database?.let{f(it)} ?: ChSql.db(db).then(f).catch{
+                net().then{res->
+                    val v = res.result
+                    if(isValid(v)) {
+                        renew(v)
+                        data[key] = v
+                        data(v)
+                    }else error()
+                }
+            }
         }
         operator fun invoke(retry:Int = 3, database:DataBase? = null){
             if(retry == 0){
@@ -211,7 +220,16 @@ object Ch{
                             }
                     }
                 }
-                database?.let{f(it)} ?: ChSql.db(db).then(f)
+                database?.let{f(it)} ?: ChSql.db(db).then(f).catch{
+                    net().then{res->
+                        val v = res.result
+                        if(isValid(v)) {
+                            renew(v)
+                            data[key] = v
+                            data(v)
+                        }else error()
+                    }
+                }
             }
         }
     }

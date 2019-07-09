@@ -54,10 +54,10 @@ class DataBase internal constructor(private val db:String, ver:Int, private val 
         } ?: null
     }
     internal var isCreate = false
-    internal fun connect() = Promise<DataBase>{res,_->
+    internal fun connect() = Promise<DataBase>{res, rej->
         if(isCreate) res(this) //then(connection.openDb(db)){res(this)}
         else then(connection.isDbExist(db)){
-            if(it == true) then(connection.openDb(db)){
+            if(it == true) then(connection.openDb(db), rej){
                 isCreate = true
                 res(this)
             }else then(connection.createDb(obj{
@@ -69,7 +69,7 @@ class DataBase internal constructor(private val db:String, ver:Int, private val 
                         if(r != null) tables[index] = r
                     }
                 }
-            })){
+            }), rej){
                 isCreate = true
                 res(this)
             }
