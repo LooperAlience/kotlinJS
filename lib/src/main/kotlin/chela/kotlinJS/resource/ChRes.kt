@@ -7,6 +7,7 @@ import chela.kotlinJS.core.ChJS.keys
 import chela.kotlinJS.sql.ChSql
 import chela.kotlinJS.validation.ChRuleSet
 import chela.kotlinJS.validation.ChValidation
+import kotlin.browser.window
 import kotlin.js.Promise
 
 object ChRes{
