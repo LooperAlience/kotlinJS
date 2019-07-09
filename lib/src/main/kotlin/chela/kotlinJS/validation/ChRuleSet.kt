@@ -37,6 +37,7 @@ class ChRuleSet(rule:String){
         var r = v
         var key = "@default"
         return if(rules.any{
+            r = v
             it.all{
                 msgKey[it]?.let{key = it}
                 r = it(r)
