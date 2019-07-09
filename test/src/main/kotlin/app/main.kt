@@ -3,6 +3,7 @@ package app
 import chela.kotlinJS.Ch
 import chela.kotlinJS.cdata.Cdata
 import chela.kotlinJS.cdata.ChCdata
+import chela.kotlinJS.core.ChJS
 import chela.kotlinJS.core.ChJS.isMobile
 import chela.kotlinJS.core.ChJS.obj
 import chela.kotlinJS.core.ChJS.objForEach
@@ -10,6 +11,7 @@ import chela.kotlinJS.model.Model
 import chela.kotlinJS.sql.ChSql
 import chela.kotlinJS.view.ChViewModel
 import kotlin.browser.document
+import kotlin.browser.window
 
 object vm:Model(true){
     val a = "@{cdata.test}"
@@ -84,6 +86,13 @@ object vm:Model(true){
 
 @Suppress("MoveLambdaOutsideParentheses")
 fun main(args: Array<String>){
+    val o = ChJS.obj {
+        islogin = true
+        email = "aaa"
+    }
+    window.localStorage.setItem("login", JSON.stringify(o))
+
+    window.localStorage.getItem("login")?.let{JSON.parse<dynamic>(it)}
 
     println("isMobile - ${isMobile()}")
 
