@@ -38,7 +38,7 @@ class ChFetch internal constructor(m:String, private var url:String): ChHttp(){
     private var form:MutableMap<String,String>? = null
     private var isLock = ""
     private var retry = 5
-    private var timeout = 5000
+    private var timeout = 15000
     override fun header(key:String, value:String) = apply{init.headers[key] = value}
     private fun _form(){
         if(isLock != "" || isLock != "form") throw Throwable("err")

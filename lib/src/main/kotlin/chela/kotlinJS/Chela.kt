@@ -174,7 +174,7 @@ object Ch{
         protected open fun renew(v:dynamic) = ChRes.res(v)
         protected open fun error(){}
         fun reload(database:DataBase? = null){
-            val f:(DataBase)->Unit = { db ->
+            val f:(DataBase)->Unit = { db->
                 net()
                     .then{res -> setDB(db, res)}
                     .then{it:dynamic ->
@@ -206,7 +206,7 @@ object Ch{
             if(data.containsKey(key) && isValid(data[key])) data(data[key])
             else{
                 data.remove(key)
-                val f:(DataBase)->Unit = {db->
+                val f:(DataBase)->Unit = { db->
                     getDB(db).then{v:dynamic->
                         if(isValid(v)){
                             renew(v)
@@ -214,20 +214,33 @@ object Ch{
                             data(v)
                         }else net()
                             .then{res->setDB(db, res)}
-                            .then{ it:dynamic->
+                            .then{it:dynamic->
                                 if(it) invoke(retry - 1, db)
                                 else error()
                             }
+                    }.catch{
+                        net().then{res->
+                            val v = res.result
+                            if(isValid(v)) {
+                                renew(v)
+                                data[key] = v
+                                data(v)
+                            }else{
+                                error()
+                            }
+                        }
                     }
                 }
-                database?.let{f(it)} ?: ChSql.db(db).then(f).catch{
+                database?.let{ f(it) } ?: ChSql.db(db).then(f).catch{
                     net().then{res->
                         val v = res.result
                         if(isValid(v)) {
                             renew(v)
                             data[key] = v
                             data(v)
-                        }else error()
+                        }else{
+                            error()
+                        }
                     }
                 }
             }
