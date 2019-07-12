@@ -45,6 +45,8 @@ object ChJS {
     fun isFunction(v:dynamic) = isFun(v)
     private val rMobile = """android|webos|iphone|ipad|ipod|blackberry|windows phone""".toRegex()
     fun isMobile() = rMobile.containsMatchIn(window.navigator.userAgent.toLowerCase())
+    private val rIOS = """iphone|ipad|ipod""".toRegex()
+    fun isIOS() = rIOS.containsMatchIn(window.navigator.userAgent.toLowerCase())
     var _stringify = js("function(o){var c=[];return JSON.stringify(o,function(k,v){if(v&&typeof v==='object'){if(c.indexOf(v)!==-1)return;c.push(v);}return v;});}")
     fun stringify(o:dynamic):String = _stringify(o)
 }
