@@ -199,6 +199,8 @@ object Ch{
             }
         }
         operator fun invoke(retry:Int = 3, database:DataBase? = null){
+            reload(database)
+            /*
             if(retry == 0){
                 error()
                 return
@@ -244,6 +246,7 @@ object Ch{
                     }
                 }
             }
+            */
         }
     }
     sealed class ApiResult(val msg:String){

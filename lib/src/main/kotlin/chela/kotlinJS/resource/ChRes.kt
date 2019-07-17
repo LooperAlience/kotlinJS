@@ -73,4 +73,13 @@ object ChRes{
             r(0)
         }
     }
+    fun clear(){
+        try{
+            ChSql.db("ch").then{
+                it.query("removeAllRes")
+            }
+        }catch (e:Throwable){
+            console.log("ChRes clear $e")
+        }
+    }
 }
