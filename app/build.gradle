@@ -23,6 +23,11 @@ dependencies {
 compileKotlin2Js {
     kotlinOptions.sourceMap = true
 }
+task pack(type: Exec){
+    doFirst{
+        commandLine = ['cmd', 'build.bat']
+    }
+}
 task packKotlin(type: Exec) {
     executable = 'npx.cmd'
     args = [
@@ -32,10 +37,23 @@ task packKotlin(type: Exec) {
             '--language_in=ECMASCRIPT5',
             '--language_out=ECMASCRIPT5',
             '--js_output_file=build/kotlin-js-min/js/base.js',
-            '--js=build/kotlin-js-min/main/kotlin.js',
+            '--js=build/kotlin-js-min/main/polyfill.js',
+            '--js=build/kotlin-js-min/main/kotlin.js'
+    ]
+}
+task packLib(type: Exec) {
+    executable = 'npx.cmd'
+    args = [
+            'google-closure-compiler',
+            '--compilation_level=SIMPLE',
+            '--env=BROWSER',
+            '--language_in=ECMASCRIPT5',
+            '--language_out=ECMASCRIPT5',
+            '--js_output_file=build/kotlin-js-min/js/lib.js',
             '--js=build/kotlin-js-min/main/lib.js'
     ]
 }
+
 task packMain(type: Exec) {
     executable = 'npx.cmd'
     args = [
