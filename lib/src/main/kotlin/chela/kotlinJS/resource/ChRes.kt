@@ -74,14 +74,16 @@ object ChRes{
             r(0)
         }
     }
-    fun clear(){
+    fun clear(end:()->Unit){
         try{
             ChSql.db("ch").then{
                 ChSql.addQuery("dropRes", "delete from ch_res")
                 it.query("dropRes")
+                end()
             }
         }catch (e:Throwable){
             console.log("ChRes clear fail $e")
+            end()
         }
     }
 }
