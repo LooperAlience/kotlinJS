@@ -56,24 +56,20 @@ object ChRes{
             )
         """)
         ChSql.db("ch").then{
-            //window.alert("chRes 1")
-            ChSql.addQuery("getRes", "select id, contents from ch_res")
+            ChSql.addQuery("getRes", "select id,contents from ch_res")
             ChSql.addQuery("isRes", "select id from ch_res where id=@id@")
             ChSql.addQuery("addRes", "insert into ch_res(id, contents)values(@id@, @contents@)")
             ChSql.addQuery("getCdata", "select contents from ch_res where id like '%@id@%' order by res_rowid desc limit 1")
             ChSql.addQuery("removeRes", "delete from ch_res where id=@id@")
-            ChSql.addQuery("removeAllRes", "delete from ch_res")
             it.query("getRes").then{
                 if(!it.isNullOrEmpty()){
                     val r = js("{}")
                     it.forEach{r[it.id] = JSON.parse(it.contents)}
                     load(r).then{v:Int->r(0)}
-                }else if(base != null) load(base).then{v:Int->r(0)}
+                }else if(base != null)load(base).then{v:Int->r(0)}
                 else r(0)
             }
-            //window.alert("chRes 2")
         }.catch{
-            //window.alert("chRes 3")
             if(base != null) keys(base){ k -> res(base[k]) }
             r(0)
         }
@@ -81,10 +77,11 @@ object ChRes{
     fun clear(){
         try{
             ChSql.db("ch").then{
-                it.query("removeAllRes")
+                ChSql.addQuery("dropRes", "delete from ch_res")
+                it.query("dropRes")
             }
         }catch (e:Throwable){
-            console.log("ChRes clear $e")
+            console.log("ChRes clear fail $e")
         }
     }
 }
