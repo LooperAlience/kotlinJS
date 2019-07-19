@@ -23,9 +23,9 @@ dependencies {
 compileKotlin2Js {
     kotlinOptions.sourceMap = true
 }
-task pack(type: Exec){
+task packJS(type: Exec){
     doFirst{
-        commandLine = ['cmd', 'build.bat']
+        commandLine = ['cmd', '/c', 'packjs.bat']
     }
 }
 task packKotlin(type: Exec) {
