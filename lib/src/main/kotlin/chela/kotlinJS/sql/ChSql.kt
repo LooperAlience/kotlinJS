@@ -6,11 +6,12 @@ import kotlin.js.Promise
 object ChSql{
     private val queries = mutableMapOf<String, ChQuery>()
     private val Dbs = mutableMapOf<String, DataBase>()
-    fun init(path:String) = addJs(path)
-    fun db(k:String) = Dbs[k]?.connect() ?: Promise.reject(Throwable("invalid db $k"))
+    fun init(path:String) = Promise.resolve<dynamic>("")//addJs(path)
+    //fun db(k:String) = Dbs[k]?.connect() ?: Promise.reject(Throwable("invalid db $k"))
+    fun db(k:String):Promise<DataBase> = Promise.reject(Throwable("invalid db $k"))
     fun addDb(k:String, vararg create:String){
         if(Dbs[k] != null) throw Throwable("exist db:$k")
-        Dbs[k] = DataBase(k, 1, create, "")
+        //Dbs[k] = DataBase(k, 1, create, "")
     }
     fun removeDb(k:String) = Dbs[k]?.remove()
     fun getQuery(key:String) = queries[key]
