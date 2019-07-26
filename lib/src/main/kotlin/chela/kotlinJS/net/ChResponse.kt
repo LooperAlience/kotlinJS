@@ -17,18 +17,7 @@ class ChResponse(private val response: Response?, var err:String? = null){
     private var arr:ArrayBuffer? = null
     private var js:Any? = null
     private var isOpened = response == null
-    fun header(k:String):String?{
-        return response?.let {
-            //window.alert("header - response - ${JSON.stringify(it)}")
-            it.headers?.let {
-                //window.alert("header - response - $k - ${it.has("atoken")} - ${it.has("Atoken")}")
-                //window.alert("header - response - $k - ${it.get("Content-Type")} - ${it.get("content-type")} - ${it.get("contentType")}")
-                //window.alert("header - response - headers - $it - k - $k - ${it.get(k)} - ${it.get(k.toLowerCase())}")
-                it.get(k)?:it.get(k.toLowerCase())
-            }
-        }
-    }
-
+    fun header(k:String):String? = response?.let { it.headers.get(k) }
     val body:Promise<String>? get() = if(isOpened) null
         else{
             isOpened = true
