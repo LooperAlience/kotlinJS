@@ -55,7 +55,7 @@ class ChLooper{
             var isEnd = false
             item.rate = if(!item.isInfinity && item.end <= c){
                 item.loop--
-                if (item.loop == 0) {
+                if (item.loop <= 0) {
                     isEnd = true
                     1.0
                 } else {

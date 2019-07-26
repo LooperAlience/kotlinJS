@@ -3,6 +3,7 @@ package chela.kotlinJS.net
 import org.khronos.webgl.ArrayBuffer
 import org.w3c.fetch.Response
 import org.w3c.files.Blob
+import kotlin.browser.window
 import kotlin.js.Promise
 
 class ChResponse(private val response: Response?, var err:String? = null){
@@ -16,7 +17,18 @@ class ChResponse(private val response: Response?, var err:String? = null){
     private var arr:ArrayBuffer? = null
     private var js:Any? = null
     private var isOpened = response == null
-    fun header(k:String) = response?.headers?.get(k)
+    fun header(k:String):String?{
+        return response?.let {
+            //window.alert("header - response - ${JSON.stringify(it)}")
+            it.headers?.let {
+                //window.alert("header - response - $k - ${it.has("atoken")} - ${it.has("Atoken")}")
+                //window.alert("header - response - $k - ${it.get("Content-Type")} - ${it.get("content-type")} - ${it.get("contentType")}")
+                //window.alert("header - response - headers - $it - k - $k - ${it.get(k)} - ${it.get(k.toLowerCase())}")
+                it.get(k)?:it.get(k.toLowerCase())
+            }
+        }
+    }
+
     val body:Promise<String>? get() = if(isOpened) null
         else{
             isOpened = true
