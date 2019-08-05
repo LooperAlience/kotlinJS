@@ -24,10 +24,10 @@ class ChGroupBase(group:HTMLElement): ChHolderBase<HTMLElement>(){
         removeTarget?.let{
             it.parentNode?.let{p->
                 if(group == p){
-                    console.log("removeChild 성공")
+                    //console.log("removeChild 성공")
                     p.removeChild(it)
                 }else{
-                    console.log("removeChild 실패")
+                    //console.log("removeChild 실패")
                 }
             }
             //group.removeChild(it)

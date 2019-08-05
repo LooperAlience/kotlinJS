@@ -11,7 +11,6 @@ abstract class ChHistory(private val default:String){
         val f:()->Unit = {
             val v = ChJS.decodeURIComponent(window.location.hash)
             hash = if(v.isBlank() || hash == "#") default else v
-            println("hash$hash")
             when{
                 history.isNotEmpty() && last() == hash->same()
                 history.size > 1 && history[history.size - 2] == hash->{

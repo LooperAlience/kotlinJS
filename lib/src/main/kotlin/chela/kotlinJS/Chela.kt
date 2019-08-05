@@ -209,7 +209,7 @@ object Ch{
         object ok:ApiResult("")
         class fail(msg:String):ApiResult(msg){
             init{
-                console.log("ApiResult.fail $msg")
+                //console.log("ApiResult.fail $msg")
             }
         }
     }
