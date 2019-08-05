@@ -8,7 +8,6 @@ import chela.kotlinJS.model.ChModel
 import chela.kotlinJS.net.ChNet
 import chela.kotlinJS.net.ChResponse
 import chela.kotlinJS.sql.ChSql
-import chela.kotlinJS.sql.DataBase
 import chela.kotlinJS.validation.ChRuleSet
 import chela.kotlinJS.view.router.ChRouter
 import chela.kotlinJS.view.router.holder.ChGroupBase
@@ -162,98 +161,54 @@ object Ch{
             return _pos
         }
     }
-    abstract class Data(val key:Any, val db:String){
-        companion object {
-            private val data = mutableMapOf<Any, dynamic>()
+    abstract class Data(val key:Any, database:String){
+        companion object{
+            private val cache = mutableMapOf<Any, dynamic>()
         }
-        protected abstract fun getDB(db:DataBase):Promise<dynamic>
-        protected abstract fun isValid(v:dynamic):Boolean
-        protected abstract fun setDB(db:DataBase, res:ChResponse):Promise<Boolean>
+        private var flag:dynamic = INVALID
+        protected val db by lazy{ChSql.getDb(database)}
         protected abstract fun net():Promise<ChResponse>
         protected abstract fun data(v:dynamic)
-        protected open fun renew(v:dynamic) = ChRes.res(v)
+        protected open fun get() = flag
+        protected open fun set(res:ChResponse):Boolean{
+            flag = res.result
+            return true
+        }
+        protected open fun isValidCache(v:dynamic) = flag != INVALID
+        protected open fun renew(v:dynamic) = ChRes.invoke(v)
         protected open fun error(){}
-        fun reload(database:DataBase? = null){
-            val f:(DataBase)->Unit = { db->
-                net()
-                    .then{res -> setDB(db, res)}
-                    .then{it:dynamic ->
-                        if(it) getDB(db).then { v: dynamic ->
-                            if (isValid(v)) {
-                                renew(v)
-                                data[key] = v
-                                data(v)
-                            } else error()
-                        } else error()
-                    }
+        open fun isChanged(){
+            flag = INVALID
+        }
+        open fun reload(){
+            net().then{
+                if(!set(it) || !isValid()) error()
             }
-            database?.let{f(it)} ?: ChSql.db(db).then(f).catch{
-                net().then{res->
-                    val v = res.result
-                    if(isValid(v)) {
-                        renew(v)
-                        data[key] = v
-                        data(v)
-                    }else error()
+        }
+        open operator fun invoke(){
+            if(cache.containsKey(key) && isValidCache(cache[key])){
+                data(cache[key])
+            }else{
+                cache.remove(key)
+                if(!isValid()) net().then{
+                    if(!set(it) || !isValid()){
+                        error()
+                    }
                 }
             }
         }
-        operator fun invoke(retry:Int = 3, database:DataBase? = null){
-            reload(database)
-            /*
-            if(retry == 0){
-                error()
-                return
-            }
-            if(data.containsKey(key) && isValid(data[key])) data(data[key])
-            else{
-                data.remove(key)
-                val f:(DataBase)->Unit = { db->
-                    getDB(db).then{v:dynamic->
-                        if(isValid(v)){
-                            renew(v)
-                            data[key] = v
-                            data(v)
-                        }else net()
-                            .then{res->setDB(db, res)}
-                            .then{it:dynamic->
-                                if(it) invoke(retry - 1, db)
-                                else error()
-                            }
-                    }.catch{
-                        net().then{res->
-                            val v = res.result
-                            if(isValid(v)) {
-                                renew(v)
-                                data[key] = v
-                                data(v)
-                            }else{
-                                error()
-                            }
-                        }
-                    }
-                }
-                database?.let{ f(it) } ?: ChSql.db(db).then(f).catch{
-                    net().then{res->
-                        val v = res.result
-                        if(isValid(v)) {
-                            renew(v)
-                            data[key] = v
-                            data(v)
-                        }else{
-                            error()
-                        }
-                    }
-                }
-            }
-            */
-        }
+        private fun isValid(v:dynamic = get()) = if(v != INVALID){
+            renew(v)
+            cache[key] = v
+            data(v)
+            true
+        }else false
     }
     sealed class ApiResult(val msg:String){
         fun isFail() = this is fail
         object ok:ApiResult("")
         class fail(msg:String):ApiResult(msg){
-            init {
+            init{
                 console.log("ApiResult.fail $msg")
             }
         }
@@ -314,7 +269,7 @@ object Ch{
     fun notify(channel: String, value:Any? = null) = channels[channel]?.let{c->
         val e = ChannelEvent(channel, value)
         c.all{
-            if(!e.isStop) false
+            if(e.isStop) false
             else{
                 it(e)
                 if(e.isRemove){

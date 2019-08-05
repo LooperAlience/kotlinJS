@@ -5,14 +5,18 @@ import kotlin.browser.window
 import kotlin.js.Promise
 
 
+@Suppress("UnsafeCastFromDynamic")
 object ChJS {
     val obj = js("Object")
     inline fun keys(v:dynamic, block:(String)->Unit) = obj.keys(v).unsafeCast<Array<String>>().forEach(block)
     inline fun <T> obj2map(v:dynamic, block:(String, dynamic)->T = {_,v->v}) = mutableMapOf<String, T>().apply {
-        if(v != undefined) obj.keys(v).unsafeCast<Array<String>>().forEach{this[it] = block(it, v[it])}
+        if(isObj(v)) obj.keys(v).unsafeCast<Array<String>>().forEach{this[it] = block(it, v[it])}
     }
     inline fun objForEach(v:dynamic, block:(String, dynamic)->Unit){
-        obj.keys(v).unsafeCast<Array<String>>().forEach{block(it, v[it])}
+        if(isObj(v)) obj.keys(v).unsafeCast<Array<String>>().forEach{block(it, v[it])}
+    }
+    inline fun objAny(v:dynamic, block:(String, dynamic)->Boolean){
+        if(isObj(v)) obj.keys(v).unsafeCast<Array<String>>().any{block(it, v[it])}
     }
     inline fun obj(block:dynamic.()->Unit):dynamic{
         val o = js("{}")
@@ -40,9 +44,8 @@ object ChJS {
         script.addEventListener("load", res)
         document.head?.appendChild(script)
     }
-    val isObj = js("function(v){var a = typeof v; return a == 'function' || a == 'object'}")
-    val isFun = js("function(v){return typeof v == 'function';}")
-    fun isFunction(v:dynamic) = isFun(v)
+    val isObj:(dynamic)->Boolean = js("function(v){var a=typeof v;return a&&a=='function'||a=='object';}")
+    val isFun:(dynamic)->Boolean = js("function(v){return typeof v=='function';}")
     private val rMobile = """android|webos|iphone|ipad|ipod|blackberry|windows phone""".toRegex()
     fun isMobile() = rMobile.containsMatchIn(window.navigator.userAgent.toLowerCase())
     private val rIOS = """iphone|ipad|ipod""".toRegex()

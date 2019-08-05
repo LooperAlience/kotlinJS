@@ -17,6 +17,7 @@ abstract class ChHttp{
     abstract fun json(json:String): ChHttp
     abstract fun body(body:String): ChHttp
     abstract fun blobBody(body:dynamic): ChHttp
+    abstract fun retry(cnt:Int): ChHttp
     abstract fun timeout(ms:Int): ChHttp
     abstract fun file(key: String, filename: String, mine: String, file: dynamic): ChHttp
     abstract fun send(block: httpCallBack)
@@ -58,6 +59,9 @@ class ChFetch internal constructor(m:String, private var url:String): ChHttp(){
         if(isLock != "") throw Throwable("err")
         isLock = "json"
         init.body = json
+    }
+    override fun retry(cnt: Int) = apply {
+        retry = cnt
     }
     override fun timeout(ms: Int) = apply {
         timeout = ms

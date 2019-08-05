@@ -1,8 +1,10 @@
 {
-  "test3@ln":{
-    "en":"test3 hello"
-  },
-  "test2@ln":{
-    "en":"test2 hello"
+  "cdata": {
+    "test3@ln": {
+      "en": "test3 hello"
+    },
+    "test2@ln": {
+      "en": "test2 hello"
+    }
   }
 }

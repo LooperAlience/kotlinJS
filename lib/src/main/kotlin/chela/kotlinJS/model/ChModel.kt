@@ -3,11 +3,11 @@ package chela.kotlinJS.model
 import chela.kotlinJS.cdata.ChCdata
 
 object ChModel{
-    internal val repo: MutableMap<String, Model> = HashMap()
+    internal val repo = mutableMapOf<String, Model>()
     operator fun get(v:String):Any = get(v.split(".").map { it.trim() })
-    operator fun get(v:List<String>, req:MutableMap<String, MutableSet<String>> = ChCdata.req):Any{
+    operator fun get(v:List<String>):Any{
         if(v.isEmpty()) throw Exception("invalid list size == 0")
-        else if(v[0] == "cdata") return ChCdata[v[1], req] ?: "no data:${v[1]}"
+        else if(v[0] == "cdata") return ChCdata[v[1]] ?: "no data:${v[1]}"
         repo[v[0]]?.let { return find(v, it) } ?: run{
             throw Exception("invalid key:" + v[0])
         }

@@ -7,9 +7,11 @@ class Cdata(val cat:String):LinkedHashMap<String, Any?>(){
     companion object{
         operator fun invoke(k:String, v:dynamic, parent: Cdata = ChCdata.root){
             val i = k.indexOf('@')
-            val data = (parent[k.substring(0, i)] as? Cdata) ?: run {
-                val r = Cdata(k.substring(i))
-                parent[k.substring(0, i)] = r
+            if(i == -1) throw Throwable("no @ in key : $k")
+            val key = k.substring(0, i)
+            val data = (parent[key] as? Cdata) ?: run {
+                val r = Cdata(k.substring(i + 1))
+                parent[key] = r
                 r
             }
             ChJS.objForEach(v){k, v->
