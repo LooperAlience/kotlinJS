@@ -3,7 +3,17 @@ package chela.kotlinJS.core
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.js.Promise
+import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLScriptElement
+import org.w3c.dom.NodeList
+import org.w3c.dom.get
 
+inline fun NodeList.toList() = run{
+    val r = mutableListOf<HTMLElement>()
+    var i = 0
+    while(i < length) r += this[i++] as HTMLElement
+    r
+}
 
 @Suppress("UnsafeCastFromDynamic")
 object ChJS {
@@ -30,18 +40,21 @@ object ChJS {
     fun <T> hasOwnKey(target:dynamic, key:String):T? = if(target.hasOwnProperty(key)) target[key] as? T else null
     fun <R> then(p:dynamic, reject:(dynamic)->R, resolve:(dynamic)->R) = (p as? Promise<dynamic>)?.catch(reject)?.then(resolve)
     fun <R> then(p:dynamic, block:(dynamic)->R) = (p as? Promise<dynamic>)?.then(block)
-    val enc = js("encodeURIComponent")
+    private val enc = js("encodeURIComponent")
     @Suppress("UnsafeCastFromDynamic")
     fun encodeURIComponent(v:String):String = enc(v)
-    val dec = js("decodeURIComponent")
+    private val dec = js("decodeURIComponent")
     @Suppress("UnsafeCastFromDynamic")
     fun decodeURIComponent(v:String):String = dec(v)
-    val inF = js("function(k, t){return k in t;}")
+    private val inF = js("function(k, t){return k in t;}")
     fun isIn(key:String, target:dynamic) = inF(key, target) as Boolean
-    fun addJs(path:String) = Promise<dynamic>{res,_->
-        val script = document.createElement("script")
+    fun addJs(path:String) = Promise<Unit>{res,_->
+        val script = document.createElement("script") as HTMLScriptElement
         script.setAttribute("src", path)
-        script.addEventListener("load", res)
+        script.onload = {
+            script.onload = null
+            res(Unit)
+        }
         document.head?.appendChild(script)
     }
     val isObj:(dynamic)->Boolean = js("function(v){var a=typeof v;return a&&a=='function'||a=='object';}")
