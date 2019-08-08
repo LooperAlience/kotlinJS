@@ -12,7 +12,7 @@ class LocalDataBase internal constructor(db:String, ver:Int, create:Array<out St
         }
     }
     internal val key = "CHDB@$db.$ver"
-    private val tables = mutableMapOf<String, Table>()
+    private val tables = mutableMapOf<String, LocalTable>()
     private val info by lazy{
         mutableMapOf<String, dynamic>().apply{
             if(isLocal) localStorage.getItem(key)?.let{
@@ -28,7 +28,7 @@ class LocalDataBase internal constructor(db:String, ver:Int, create:Array<out St
     }
     private fun getTable(tname:String) = tables[tname] ?: run {
         if(!info.containsKey(tname)) throw Throwable("invalid table:$tname")
-        val t = Table(this, info[tname])
+        val t = LocalTable(this, info[tname])
         tables[tname] = t
         t
     }
@@ -44,7 +44,7 @@ class LocalDataBase internal constructor(db:String, ver:Int, create:Array<out St
     override fun remove() {
         localStorage.getItem(key)?.let{
             objForEach(JSON.parse(it)){k, v->
-                (tables[k] ?: Table(this, v)).remove()
+                (tables[k] ?: LocalTable(this, v)).remove()
             }
         }
     }
@@ -97,7 +97,7 @@ class LocalDataBase internal constructor(db:String, ver:Int, create:Array<out St
             arrayOf(obj)
         }
 
-    private fun selectGroup(r:dynamic, fields:MutableList<String>, table:Table, rs:Array<dynamic>) =
+    private fun selectGroup(r:dynamic, fields:MutableList<String>, table:LocalTable, rs:Array<dynamic>) =
         if(r.groupBy == undefined) null
         else{
             val group = rs.groupBy{it[r.groupBy]}
