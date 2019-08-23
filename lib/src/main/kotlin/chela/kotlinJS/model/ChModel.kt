@@ -7,7 +7,7 @@ object ChModel{
     operator fun get(v:String):Any = get(v.split(".").map { it.trim() })
     operator fun get(v:List<String>):Any{
         if(v.isEmpty()) throw Exception("invalid list size == 0")
-        else if(v[0] == "cdata") return ChCdata[v[1]] ?: "no data:${v[1]}"
+        else if(v[0] == "cdata") return ChCdata[v[1]] ?: "---"//"no data:${v[1]}"
         repo[v[0]]?.let { return find(v, it) } ?: run{
             throw Exception("invalid key:" + v[0])
         }
