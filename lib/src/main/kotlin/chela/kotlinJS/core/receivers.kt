@@ -12,7 +12,7 @@ fun <K, V> Map<K, V>._toJSON():String{
         r += "\"$k\":" + when(v) {
             is toJSON ->v.toJSON()
             is Map<*, *>->v._toJSON()
-            is String->"\"" + v.replace("\"", "\\\"") + "\""
+            is String->"\"" + v.replace("\"", "¤^%^£").replace("\\","\\\\").replace("¤^%^£", "\\\"") + "\""
             else->"$v"
         }
     }
