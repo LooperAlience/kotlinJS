@@ -1,9 +1,9 @@
-/app_mscoco/
-/app_seller/
+/app_mscoco
+/app_seller
 
 /.gradle
 /lib/build
 /.idea
 gradlew.bat
 gradlew
-/test/
+/test
