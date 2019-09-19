@@ -22,7 +22,7 @@ class ChRouter<T, R:ChHolderBase<T>>(val base:R){
         base._pop(h, false)
         stack._pop()
         keys._pop()
-        if (stack.isNotEmpty()) base._resume(stack.last(), true)
+        if(stack.isNotEmpty()) base._resume(stack.last(), true)
         return stack.size
     }
     fun take(holder: ChHolder<T>){
