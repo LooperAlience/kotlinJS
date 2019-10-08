@@ -22,7 +22,7 @@ import kotlin.browser.window
 import kotlin.js.Promise
 
 typealias throttleF = (Double, Array<out Any>)->Unit
-typealias debounceF = (Array<out Any>)->Unit
+typealias debounceF = (Any)->Unit
 object Ch{
     enum class Values{INVALID, NONE}
     var debugLevel = 0
@@ -311,19 +311,14 @@ object Ch{
             }
         }
     }
-    fun debounce(rate:Double, vararg arg:Any, block:debounceF):()->Unit{
+    fun debounce(rate:Double, block:debounceF):(Any)->Unit{
         var timeOutId = -1
-        val delay = {
-            block(arg)
-            timeOutId = -1
-        }
-        return {
-            if(timeOutId != -1){
-                window.clearTimeout(timeOutId)
+        return {v->
+            if(timeOutId != -1) window.clearTimeout(timeOutId)
+            timeOutId = window.setTimeout({
+                block(v)
                 timeOutId = -1
-            }
-            timeOutId = window.setTimeout(delay, rate.toInt())
+            }, rate.toInt())
         }
     }
-
 }
