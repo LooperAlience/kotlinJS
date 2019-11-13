@@ -57,7 +57,7 @@ class El(val el:HTMLElement, val record:dynamic = null){
         private val prop = mutableMapOf<String, (El, HTMLElement, String, dynamic)->Unit>(
             "className" to {self, el, _, v-> el.className = v},
             "+className" to {self, el, _, v-> el.className = v + " " + el.className},
-            "html" to {self, el, _, v-> el.innerHTML = v},
+            "html" to {self, el, _, v->el.innerHTML = v},
             "+html" to {self, el, _, v-> el.innerHTML = v + el.innerHTML},
             "html+" to {self, el, _, v-> el.innerHTML += v},
             "name" to {self, el, _, v->

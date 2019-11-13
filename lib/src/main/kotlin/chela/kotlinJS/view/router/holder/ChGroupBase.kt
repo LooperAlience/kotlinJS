@@ -1,5 +1,6 @@
 package chela.kotlinJS.view.router.holder
 
+import chela.kotlinJS.view.router.ChRouter
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 
