@@ -65,5 +65,21 @@ object ChJS {
     fun isIOS() = rIOS.containsMatchIn(window.navigator.userAgent.toLowerCase())
     var _stringify = js("function(o){var c=[];return JSON.stringify(o,function(k,v){if(v&&typeof v==='object'){if(c.indexOf(v)!==-1)return;c.push(v);}return v;});}")
     fun stringify(o:dynamic):String = _stringify(o)
+    fun safeDynamic(target:dynamic, key:String, block:(dynamic)->Unit):Unit{
+        val v = key.split(".").fold(target){ acc, v ->
+            if(acc == null  || acc == undefined) acc
+            else{
+                if(acc[v] == null || acc[v] == undefined) null
+                else acc[v]
+            }
+        }
+        if(v != null) block(v)
+    }
+    fun isFalsy(v:dynamic) = v == null || v == undefined || v == "" || v == 0
+    fun isTruthy(v:dynamic, block:((dynamic) -> Unit)?= null):Boolean{
+        val r = !isFalsy(v)
+        if(r) block?.let{ it(v) }
+        return r
+    }
 }
 external fun delete(p: dynamic): Boolean = definedExternally
