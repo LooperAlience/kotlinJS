@@ -75,7 +75,7 @@ object ChJS {
         }
         if(v != null) block(v)
     }
-    fun isFalsy(v:dynamic) = v == null || v == undefined || v == "" || v == 0
+    fun isFalsy(v:dynamic) = v == null || v == undefined || v == "" || v == 0 || v == "false" || v == false
     fun isTruthy(v:dynamic, block:((dynamic) -> Unit)?= null):Boolean{
         val r = !isFalsy(v)
         if(r) block?.let{ it(v) }
